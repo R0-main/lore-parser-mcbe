@@ -1,6 +1,6 @@
 import Template from './template';
 import LoreError from './lore.error';
-class LoreParse {
+class LoreParser {
     constructor(itemStack, template) {
         this.itemStack = itemStack;
         this.template = template;
@@ -19,23 +19,16 @@ class LoreParse {
     }
     set(key, value) {
         const keyValue = this.template.keys[key];
-        this.currentLore = this.currentLore.map((v) => (v.includes(keyValue) ? v.replace(keyValue, value.toString()) : v));
+        this.currentLore = this.currentLore.map((v) => v.replaceAll(keyValue, value.toString() /*  + LoreParser.END_MARKER */));
         this.itemStack.setLore(this.currentLore);
     }
     get(key) {
         const keyValue = this.template.keys[key];
-        let mappedLore = this.template.shape.filter((v) => v.includes(keyValue));
-        const needToRemove = mappedLore.map((v) => v.split(keyValue));
-        for (let u = 0; u < this.currentLore.length; u++) {
-            for (let i = 0; i < needToRemove.length; i++) {
-                for (let y = 0; y < needToRemove[i].length; y++) {
-                    if (needToRemove[i][y].trim().length > 0) {
-                        this.currentLore[u] = this.currentLore[u].replaceAll(needToRemove[i][y], '');
-                    }
-                }
-            }
-        }
-        return this.currentLore;
+        const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
+        const targetLine = this.currentLore[lineIndex];
+        const keyIndex = this.template.shape[lineIndex].split(Template.MARKER).indexOf(keyValue);
+        const value = targetLine.split(Template.MARKER);
+        return value[keyIndex] || null;
     }
     initTemplate() {
         this.currentLore = this.template.shape;
@@ -46,10 +39,10 @@ class LoreParse {
         player.getComponent('inventory').container.setItem(slot, this.itemStack);
     }
 }
-LoreParse.BASE_TEMPLATE = new Template(['Durability : %s'], {
+LoreParser.BASE_TEMPLATE = new Template(['Durability : %s'], {
     durability: '%s',
 }, {
     clearLines: true,
     basesColors: '§7',
 });
-export default LoreParse;
+export default LoreParser;

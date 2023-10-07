@@ -2,16 +2,33 @@ import { Container, EntityComponent, world } from '@minecraft/server';
 import LoreParser from 'lore-parser/lore.parser';
 import Template from 'lore-parser/template';
 
-const durabilityTemplate = new Template(
+const damageGlyphe = '';
+
+const damageGlypheToValue = {
+	'': 1,
+	'': 2,
+	'': 3,
+	'': 4,
+	'': 5,
+	'': 6,
+	'': 7,
+	'': 8,
+	'': 9,
+	'': 10,
+};
+
+const weaponTemplate = new Template(
 	[
-		'┌─', 
+		'┌─',
 		'│', 
-		'│ §7Durability §8: §h%s', 
-		'│', 
+		'│ §7Damage §8: §h%d', 
+		'│ §7Durability §8: §h%s/%m', 
+		'│ ', 
 		'└─ '
 	],
 	{
 		durability: '%s',
+		maxDurability: '%m',
 		rarity: '%r',
 		rarity1: '%r1',
 		damage: '%d',
@@ -22,58 +39,105 @@ const durabilityTemplate = new Template(
 	}
 );
 
+const armorTempalte = new Template(
+	['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '],
+	{
+		durability: '%s',
+		protection: '%p',
+	},
+	{
+		clearLines: true,
+		basesColors: '§7',
+	}
+);
+
 /* let test : test<Template> = '' */
 
-for (const player of world.getAllPlayers()) {
+/* for (const player of world.getAllPlayers()) {
 	// @ts-ignore
 	const inventory = player.getComponent('inventory')?.container as Container;
 	const item = inventory.getItem(player.selectedSlot);
 
-	const loreParser = new LoreParser(item, durabilityTemplate);
+	const armorsNames = ['chestplate', 'helmet', 'leggings', 'boots'];
 
-	loreParser.add('§r§efafaz');
-	loreParser.add('§r§afafaz');
-	loreParser.add('§r§tfafaz');
+	const isArmor = armorsNames.some((v) => item.typeId.includes(v));
+
+	let loreParser;
+
+	if (armorsNames.some((v) => item.typeId.includes(v))) loreParser = new LoreParser(item, armorTempalte);
+	else loreParser = new LoreParser(item, weaponTemplate);
+
 	loreParser.initTemplate();
 
 	loreParser.set('durability', 100);
 
-	console.warn(loreParser.get('durability'));
+	if (isArmor) {
+		loreParser.set('protection', '1900M');
+	} else {
+		const damageGlyphe1 = Object.keys(damageGlypheToValue)[randomIntFromInterval(0, Object.keys(damageGlypheToValue).length - 1)];
+
+		const damage = damageGlyphe + damageGlyphe1;
+
+		damageGlypheToValue['']; // 1000
+
+		loreParser.set('damage', damage);
+	}
+
+	loreParser.get('damage'); // => 10M
+
 	loreParser.update(player);
+} */
+
+function randomIntFromInterval(min, max) {
+	// min and max included
+	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-const cmd = world.getDimension('overworld').runCommand('say hello');
-
-/* console.warn(cmd.)
 
 
-class ClassB<Data extends Record<string, any>> {
-  
-	constructor(public data: Array<string>, public keys : Data) {
+world.afterEvents.chatSend.subscribe((evt) => {
+	// @ts-ignore
+	const inventory = evt.sender.getComponent('inventory')?.container as Container;
+	const item = inventory.getItem(evt.sender.selectedSlot);
+
+
+	if (!evt.message.startsWith('-')) {
+		const lp = new LoreParser(item, weaponTemplate);
+
+		
+
+		console.warn(lp.get('damage'))
+		return
+	};
+
+
+	const armorsNames = ['chestplate', 'helmet', 'leggings', 'boots'];
+
+	const isArmor = armorsNames.some((v) => item.typeId.includes(v));
+
+	let loreParser;
+
+	if (armorsNames.some((v) => item.typeId.includes(v))) loreParser = new LoreParser(item, armorTempalte);
+	else loreParser = new LoreParser(item, weaponTemplate);
+
+	loreParser.initTemplate();
+
+	loreParser.set('durability', 100);
+	loreParser.set('maxDurability', 1000);
+
+	if (isArmor) {
+		loreParser.set('protection', '1900M');
+	} else {
+		const damageGlyphe1 = Object.keys(damageGlypheToValue)[randomIntFromInterval(0, Object.keys(damageGlypheToValue).length - 1)];
+
+		const damage = damageGlyphe + damageGlyphe1;
+
+		loreParser.set('damage', "damage");
 	}
-  }
-  
-  class ClassA<Data extends Record<string, any>> {
-  
-	constructor(public classBInstance: ClassB<Data>) {}
-  
-	// Utilisez un type générique pour la méthode getValueByKey
-	// qui accepte uniquement les clés du type de données de la classe B.
-	getValueByKey<K extends keyof Data>(key: K): Data[K] {
-	  if (this.classBInstance.keys.hasOwnProperty(key)) {
-		return this.classBInstance.keys[key];
-	  } else {
-		throw new Error(`La clé "${key}" n'existe pas dans l'attribut de la classe B.`);
-	  }
-	}
-  }
 
-  const instanceB = new ClassB(['test'], {
-	name: "John",
-	ag2: 30,
-	age1: 30,
-  });
-  const instanceA = new ClassA(instanceB);
-  
-  const nameValue = instanceA.getValueByKey(''); // Le type de nameValue est string
-  console.log(nameValue); // Affiche "John" dans la console. */
+	// console.warn(loreParser.get('damage')); // => 10M
+
+	loreParser.update(evt.sender);
+});
+
+console.warn("first")

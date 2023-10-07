@@ -8,7 +8,7 @@ export type TTemplate = {
 	options: TOptions;
 };
 
-export default class LoreParse<TTemplate extends Template<TKeys>> {
+export default class LoreParser<TTemplate extends Template<TKeys>> {
 	private static BASE_TEMPLATE = new Template(
 		['Durability : %s'],
 		{
@@ -34,29 +34,24 @@ export default class LoreParse<TTemplate extends Template<TKeys>> {
 		}
 	}
 
-	public set<T extends keyof TTemplate['keys']>(key: T, value: string | number | boolean): void {
+	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void {
 		const keyValue = this.template.keys[key as string];
-		this.currentLore = this.currentLore.map((v) => (v.includes(keyValue) ? v.replace(keyValue, value.toString()) : v));
+		this.currentLore = this.currentLore.map((v) => v.replaceAll(keyValue, value.toString() /*  + LoreParser.END_MARKER */));
 		this.itemStack.setLore(this.currentLore);
 	}
 
-	public get<T extends keyof TTemplate['keys']>(key: T): string {
+	public get(key: keyof TTemplate['keys']): string {
 		const keyValue = this.template.keys[key as string];
-		let mappedLore = this.template.shape.filter((v) => v.includes(keyValue));
-		const needToRemove = mappedLore.map((v) => v.split(keyValue));
 
-		for (let u = 0; u < this.currentLore.length; u++) {
-			for (let i = 0; i < needToRemove.length; i++) {
-				for (let y = 0; y < needToRemove[i].length; y++) {
-					if (needToRemove[i][y].trim().length > 0) {
-						this.currentLore[u] = this.currentLore[u].replaceAll(needToRemove[i][y], '');
-					}
-				}
-			}
-		}
-		return this.currentLore;
+		const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
+		const targetLine = this.currentLore[lineIndex];
+
+		const keyIndex = this.template.shape[lineIndex].split(Template.MARKER).indexOf(keyValue);
+
+		const value = targetLine.split(Template.MARKER);
+
+		return value[keyIndex] || null;
 	}
-
 	public initTemplate(): void {
 		this.currentLore = this.template.shape;
 		this.itemStack.setLore(this.currentLore);
