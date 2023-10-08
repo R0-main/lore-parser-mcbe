@@ -9,9 +9,14 @@ class LoreParser {
     add(...strings) {
         for (let i = 0; i < strings.length; i++) {
             const str = strings[i];
+            if (str.length > LoreError.MAX_LORE_LINE_LENGTH) {
+                new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+                continue;
+            }
             if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE_LENGTH) {
                 this.currentLore = [...this.currentLore, str];
                 this.itemStack.setLore(this.currentLore);
+                break;
             }
             else
                 new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
@@ -19,8 +24,14 @@ class LoreParser {
     }
     set(key, value) {
         const keyValue = this.template.keys[key];
-        this.currentLore = this.currentLore.map((v) => v.replaceAll(keyValue, value.toString() /*  + LoreParser.END_MARKER */));
-        this.itemStack.setLore(this.currentLore);
+        let lore = this.currentLore;
+        if (typeof value === 'string' && value?.length > LoreError.MAX_LORE_LINE_LENGTH)
+            return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+        lore = lore.map((v) => v.replaceAll(keyValue, value.toString()));
+        if (lore.some((line) => line.length > LoreError.MAX_LORE_LINE_LENGTH))
+            return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+        this.currentLore = lore;
+        this.itemStack.setLore(lore);
     }
     get(key) {
         const keyValue = this.template.keys[key];

@@ -27,17 +27,32 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 	public add(...strings: Array<string>): void {
 		for (let i = 0; i < strings.length; i++) {
 			const str = strings[i];
+
+			if (str.length > LoreError.MAX_LORE_LINE_LENGTH) {
+				new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+				continue;
+			}
+
 			if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE_LENGTH) {
 				this.currentLore = [...this.currentLore, str];
 				this.itemStack.setLore(this.currentLore);
+				break;
 			} else new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
 		}
 	}
 
-	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void {
+	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void | LoreError {
 		const keyValue = this.template.keys[key as string];
-		this.currentLore = this.currentLore.map((v) => v.replaceAll(keyValue, value.toString() /*  + LoreParser.END_MARKER */));
-		this.itemStack.setLore(this.currentLore);
+		let lore = this.currentLore;
+
+		if (typeof value === 'string' && value?.length > LoreError.MAX_LORE_LINE_LENGTH) return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+
+		lore = lore.map((v) => v.replaceAll(keyValue, value.toString()));
+
+		if (lore.some((line) => line.length > LoreError.MAX_LORE_LINE_LENGTH)) return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+
+		this.currentLore = lore;
+		this.itemStack.setLore(lore);
 	}
 
 	public get(key: keyof TTemplate['keys']): string {
