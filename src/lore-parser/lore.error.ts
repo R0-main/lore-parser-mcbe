@@ -1,5 +1,5 @@
 export default class LoreError {
-	private static ERROR_PREFIX: string = 'LoreError:';
+	private static ERROR_PREFIX: string = '§4LoreError: §c';
 
 	public static MAX_LORE_LINE_LENGTH: number = 50;
 	public static MAX_LORE_LINE: number = 20;

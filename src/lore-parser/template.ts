@@ -1,4 +1,5 @@
 import LoreParser from './lore.parser';
+import TemplateManager from './templates.manager';
 
 export type TOptions = {
 	clearLines: boolean;
@@ -10,14 +11,15 @@ export type TShape = Array<string>;
 export type TKeys = Record<string, string>;
 
 export default class Template<T extends TKeys> {
-	public static MARKER: string = '§×';
 	public static CLEAR_LINE: string = '§r';
 
-	constructor(private readonly base: TShape, public readonly keys: T, public readonly options?: TOptions) {
+	constructor(private readonly base: TShape, public readonly keys: T, public readonly id: string, public readonly options?: TOptions) {
 		this.base = this.base.map((v) => {
-			Object.values(this.keys).forEach((key) => v = v.replaceAll(key, Template.MARKER + key + Template.MARKER));
+			Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplateManager.MARKER + key + TemplateManager.MARKER)));
 			return v;
 		});
+
+		TemplateManager.addTemplate(this);
 	}
 
 	public get shape(): TShape {

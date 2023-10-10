@@ -1,6 +1,6 @@
-import Template from './template';
 import LoreError from './lore.error';
-class LoreParser {
+import TemplateManager from './templates.manager';
+export default class LoreParser {
     constructor(itemStack, template) {
         this.itemStack = itemStack;
         this.template = template;
@@ -13,13 +13,13 @@ class LoreParser {
                 new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
                 continue;
             }
-            if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE_LENGTH) {
+            if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE) {
                 this.currentLore = [...this.currentLore, str];
                 this.itemStack.setLore(this.currentLore);
-                break;
+                return;
             }
             else
-                new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+                new LoreError(LoreError.types.MAX_LORE_LINE);
         }
     }
     set(key, value) {
@@ -37,8 +37,8 @@ class LoreParser {
         const keyValue = this.template.keys[key];
         const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
         const targetLine = this.currentLore[lineIndex];
-        const keyIndex = this.template.shape[lineIndex].split(Template.MARKER).indexOf(keyValue);
-        const value = targetLine.split(Template.MARKER);
+        const keyIndex = this.template.shape[lineIndex].split(TemplateManager.MARKER).indexOf(keyValue);
+        const value = targetLine.split(TemplateManager.MARKER);
         return value[keyIndex] || null;
     }
     initTemplate() {
@@ -50,10 +50,3 @@ class LoreParser {
         player.getComponent('inventory').container.setItem(slot, this.itemStack);
     }
 }
-LoreParser.BASE_TEMPLATE = new Template(['Durability : %s'], {
-    durability: '%s',
-}, {
-    clearLines: true,
-    basesColors: '§7',
-});
-export default LoreParser;

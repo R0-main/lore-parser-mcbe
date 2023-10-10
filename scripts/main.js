@@ -1,6 +1,7 @@
 import { world } from '@minecraft/server';
 import LoreParser from 'lore-parser/lore.parser';
 import Template from 'lore-parser/template';
+import TemplateManager from 'lore-parser/templates.manager';
 const damageGlyphe = '';
 const damageGlypheToValue = {
     '': 1,
@@ -14,27 +15,26 @@ const damageGlypheToValue = {
     '': 9,
     '': 10,
 };
-const weaponTemplate = new Template([
-    '┌─',
-    '│',
-    '│ §7Damage §8: §h%d',
-    '│ §7Durability §8: §h%s/%m',
-    '│ ',
-    '└─ '
-], {
+const weaponTemplate = new Template(['┌─', '│', '│ §7Damage §8: §h%d', '│ §7Durability §8: §h%s/%m', '│ ', '└─ '], {
     durability: '%s',
     maxDurability: '%m',
     rarity: '%r',
     rarity1: '%r1',
     damage: '%d',
-}, {
+}, 'weaponTempate', {
     clearLines: true,
     basesColors: '§7',
 });
-const armorTempalte = new Template(['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '], {
+const enchantTemplate = new Template(['', '%e', '3', '4', '5', '6', '7', '8', '9'], {
+    enchant: '%e',
+}, 'enchantTempate', {
+    clearLines: true,
+    basesColors: '§7',
+});
+const armorTemplate = new Template(['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '], {
     durability: '%s',
     protection: '%p',
-}, {
+}, 'armorTemplate', {
     clearLines: true,
     basesColors: '§7',
 });
@@ -81,31 +81,25 @@ world.afterEvents.chatSend.subscribe((evt) => {
     // @ts-ignore
     const inventory = evt.sender.getComponent('inventory')?.container;
     const item = inventory.getItem(evt.sender.selectedSlot);
-    if (!evt.message.startsWith('-')) {
-        const lp = new LoreParser(item, weaponTemplate);
-        console.warn(lp.get('damage'));
+    const lp = new LoreParser(item, weaponTemplate);
+    if (evt.message.startsWith('-add')) {
+        /* 		lp.add('enchant', 'Xp upgarde III\n§gFire Sword I\n§2Poison II');
+        lp.update(evt.sender); */
+        TemplateManager.getTemplate(item.getLore());
         return;
     }
-    ;
-    const armorsNames = ['chestplate', 'helmet', 'leggings', 'boots'];
-    const isArmor = armorsNames.some((v) => item.typeId.includes(v));
-    let loreParser;
-    if (armorsNames.some((v) => item.typeId.includes(v)))
-        loreParser = new LoreParser(item, armorTempalte);
-    else
-        loreParser = new LoreParser(item, weaponTemplate);
-    loreParser.initTemplate();
-    loreParser.set('durability', 100);
-    loreParser.set('maxDurability', 1000);
-    if (isArmor) {
-        loreParser.set('protection', '1900M');
-    }
-    else {
-        const damageGlyphe1 = Object.keys(damageGlypheToValue)[randomIntFromInterval(0, Object.keys(damageGlypheToValue).length - 1)];
-        const damage = damageGlyphe + damageGlyphe1;
-        loreParser.set('damage', "damage");
-    }
-    // console.warn(loreParser.get('damage')); // => 10M
-    loreParser.update(evt.sender);
+    /* 	if (!evt.message.startsWith('-')) {
+
+
+        lp.get('enchant')
+
+        return
+    }; */
+    lp.initTemplate();
+    lp.set('durability', 100);
+    lp.set('maxDurability', 1000);
+    //lp.add('enchant' , 'Xp upgarde III\n§gFire Sword I\n§2Poison II')
+    /* 	lp.itemStack.nameTag = 'test\nfazfa'.repeat(20) */
+    lp.update(evt.sender);
 });
-console.warn("first");
+console.warn('first');

@@ -1,6 +1,7 @@
 import { ItemStack, Player } from '@minecraft/server';
 import Template, { TKeys, TOptions, TShape } from './template';
 import LoreError from './lore.error';
+import TemplateManager from './templates.manager';
 
 export type TTemplate = {
 	shape: Array<string>;
@@ -9,17 +10,6 @@ export type TTemplate = {
 };
 
 export default class LoreParser<TTemplate extends Template<TKeys>> {
-	private static BASE_TEMPLATE = new Template(
-		['Durability : %s'],
-		{
-			durability: '%s',
-		},
-		{
-			clearLines: true,
-			basesColors: '§7',
-		}
-	);
-
 	private currentLore: TShape = this.itemStack.getLore() || [];
 
 	constructor(public itemStack: ItemStack, public template: TTemplate) {}
@@ -33,11 +23,11 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 				continue;
 			}
 
-			if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE_LENGTH) {
+			if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE) {
 				this.currentLore = [...this.currentLore, str];
 				this.itemStack.setLore(this.currentLore);
-				break;
-			} else new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+				return;
+			} else new LoreError(LoreError.types.MAX_LORE_LINE);
 		}
 	}
 
@@ -61,12 +51,13 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 		const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
 		const targetLine = this.currentLore[lineIndex];
 
-		const keyIndex = this.template.shape[lineIndex].split(Template.MARKER).indexOf(keyValue);
+		const keyIndex = this.template.shape[lineIndex].split(TemplateManager.MARKER).indexOf(keyValue);
 
-		const value = targetLine.split(Template.MARKER);
+		const value = targetLine.split(TemplateManager.MARKER);
 
 		return value[keyIndex] || null;
 	}
+
 	public initTemplate(): void {
 		this.currentLore = this.template.shape;
 		this.itemStack.setLore(this.currentLore);

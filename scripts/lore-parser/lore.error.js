@@ -4,7 +4,7 @@ class LoreError {
         console.warn(LoreError.ERROR_PREFIX + message);
     }
 }
-LoreError.ERROR_PREFIX = 'LoreError:';
+LoreError.ERROR_PREFIX = '§4LoreError: §c';
 LoreError.MAX_LORE_LINE_LENGTH = 50;
 LoreError.MAX_LORE_LINE = 20;
 LoreError.types = {
