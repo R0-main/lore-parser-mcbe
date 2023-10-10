@@ -1,5 +1,5 @@
 import LoreError from './lore.error';
-import TemplateManager from './templates.manager';
+import TemplatesManager from './templates.manager';
 export default class LoreParser {
     constructor(itemStack, template) {
         this.itemStack = itemStack;
@@ -37,8 +37,8 @@ export default class LoreParser {
         const keyValue = this.template.keys[key];
         const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
         const targetLine = this.currentLore[lineIndex];
-        const keyIndex = this.template.shape[lineIndex].split(TemplateManager.MARKER).indexOf(keyValue);
-        const value = targetLine.split(TemplateManager.MARKER);
+        const keyIndex = this.template.shape[lineIndex].split(TemplatesManager.MARKER).indexOf(keyValue);
+        const value = targetLine.split(TemplatesManager.MARKER);
         return value[keyIndex] || null;
     }
     initTemplate() {

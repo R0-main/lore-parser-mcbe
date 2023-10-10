@@ -1,7 +1,7 @@
 import { ItemStack, Player } from '@minecraft/server';
 import Template, { TKeys, TOptions, TShape } from './template';
 import LoreError from './lore.error';
-import TemplateManager from './templates.manager';
+import TemplatesManager from './templates.manager';
 
 export type TTemplate = {
 	shape: Array<string>;
@@ -51,9 +51,9 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 		const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
 		const targetLine = this.currentLore[lineIndex];
 
-		const keyIndex = this.template.shape[lineIndex].split(TemplateManager.MARKER).indexOf(keyValue);
+		const keyIndex = this.template.shape[lineIndex].split(TemplatesManager.MARKER).indexOf(keyValue);
 
-		const value = targetLine.split(TemplateManager.MARKER);
+		const value = targetLine.split(TemplatesManager.MARKER);
 
 		return value[keyIndex] || null;
 	}

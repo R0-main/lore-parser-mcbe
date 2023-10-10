@@ -1,4 +1,4 @@
-import TemplateManager from './templates.manager';
+import TemplatesManager from './templates.manager';
 class Template {
     constructor(base, keys, id, options) {
         this.base = base;
@@ -6,10 +6,10 @@ class Template {
         this.id = id;
         this.options = options;
         this.base = this.base.map((v) => {
-            Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplateManager.MARKER + key + TemplateManager.MARKER)));
+            Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
             return v;
         });
-        TemplateManager.addTemplate(this);
+        TemplatesManager.addTemplate(this);
     }
     get shape() {
         return Template.handlerOptions(this.base, this.options);

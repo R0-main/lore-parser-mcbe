@@ -1,7 +1,7 @@
 import { world } from '@minecraft/server';
 import LoreParser from 'lore-parser/lore.parser';
 import Template from 'lore-parser/template';
-import TemplateManager from 'lore-parser/templates.manager';
+import TemplatesManager from 'lore-parser/templates.manager';
 const damageGlyphe = '';
 const damageGlypheToValue = {
     '': 1,
@@ -85,7 +85,7 @@ world.afterEvents.chatSend.subscribe((evt) => {
     if (evt.message.startsWith('-add')) {
         /* 		lp.add('enchant', 'Xp upgarde III\n§gFire Sword I\n§2Poison II');
         lp.update(evt.sender); */
-        TemplateManager.getTemplate(item.getLore());
+        TemplatesManager.getTemplate(item.getLore());
         return;
     }
     /* 	if (!evt.message.startsWith('-')) {
