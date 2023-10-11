@@ -49,4 +49,8 @@ export default class LoreParser {
         // @ts-ignore
         player.getComponent('inventory').container.setItem(slot, this.itemStack);
     }
+    static hasTemplate(lore, template) {
+        const templates = TemplatesManager.getTemplates(lore);
+        return !!templates.get(template.name);
+    }
 }

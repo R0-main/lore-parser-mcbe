@@ -1,6 +1,6 @@
-import { Container, EntityComponent, world } from '@minecraft/server';
+import { Container, EntityComponent, world, ItemStack, Player } from '@minecraft/server';
 import LoreParser from 'lore-parser/lore.parser';
-import Template from 'lore-parser/template';
+import Template, { TKeys } from 'lore-parser/template';
 import TemplatesManager from 'lore-parser/templates.manager';
 
 const damageGlyphe = '';
@@ -19,15 +19,14 @@ const damageGlypheToValue = {
 };
 
 const weaponTemplate = new Template(
+	'weaponTempate',
 	['┌─', '│', '│ §7Damage §8: §h%d', '│ §7Durability §8: §h%s/%m', '│ ', '└─ '],
 	{
 		durability: '%s',
 		maxDurability: '%m',
-		rarity: '%r',
-		rarity1: '%r1',
 		damage: '%d',
 	},
-	'weaponTempate',
+
 	{
 		clearLines: true,
 		basesColors: '§7',
@@ -35,11 +34,11 @@ const weaponTemplate = new Template(
 );
 
 const enchantTemplate = new Template(
+	'enchantTemplate',
 	['', '%e', '3', '4', '5', '6', '7', '8', '9'],
 	{
 		enchant: '%e',
 	},
-	'enchantTempate',
 	{
 		clearLines: true,
 		basesColors: '§7',
@@ -47,12 +46,12 @@ const enchantTemplate = new Template(
 );
 
 const armorTemplate = new Template(
+	'armorTemplate',
 	['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '],
 	{
 		durability: '%s',
 		protection: '%p',
 	},
-	'armorTemplate',
 	{
 		clearLines: true,
 		basesColors: '§7',
@@ -111,7 +110,10 @@ world.afterEvents.chatSend.subscribe((evt) => {
 		/* 		lp.add('enchant', 'Xp upgarde III\n§gFire Sword I\n§2Poison II');
 		lp.update(evt.sender); */
 
-		TemplatesManager.getTemplate(item.getLore());
+		const lpWeapon = new LoreParser(item, weaponTemplate);
+
+		lpWeapon.set('durability', 100)
+
 		return;
 	}
 
@@ -132,6 +134,17 @@ world.afterEvents.chatSend.subscribe((evt) => {
 	/* 	lp.itemStack.nameTag = 'test\nfazfa'.repeat(20) */
 
 	lp.update(evt.sender);
+});
+
+world.afterEvents.buttonPush.subscribe(({ source }) => {
+	const player = source as Player;
+
+	// @ts-ignore
+	const inventory = player.getComponent('inventory')?.container as Container;
+	const item = inventory.getItem(player.selectedSlot);
+	const lpWPtemplate = new LoreParser(item, weaponTemplate);
+
+	lpWPtemplate.hasTemplate();
 });
 
 console.warn('first');

@@ -13,7 +13,7 @@ export type TKeys = Record<string, string>;
 export default class Template<T extends TKeys> {
 	public static CLEAR_LINE: string = '§r';
 
-	constructor(private readonly base: TShape, public readonly keys: T, public readonly id: string, public readonly options?: TOptions) {
+	constructor(public readonly name: string, private readonly base: TShape, public readonly keys: T, public readonly options?: TOptions) {
 		this.base = this.base.map((v) => {
 			Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
 			return v;

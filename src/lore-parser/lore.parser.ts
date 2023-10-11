@@ -31,7 +31,7 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 		}
 	}
 
-	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void | LoreError {
+	public set(key: keyof TTemplate['keys'] , value: string | number | boolean): void | LoreError {
 		const keyValue = this.template.keys[key as string];
 		let lore = this.currentLore;
 
@@ -66,5 +66,10 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 	public update(player: Player, slot: number = player.selectedSlot): void {
 		// @ts-ignore
 		player.getComponent('inventory').container.setItem(slot, this.itemStack);
+	}
+
+	public static hasTemplate(lore : Array<string>, template: Template<TKeys>): boolean {
+		const templates = TemplatesManager.getTemplates(lore);
+		return !!templates.get(template.name);
 	}
 }
