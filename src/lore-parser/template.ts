@@ -18,6 +18,7 @@ export default class Template<T extends TKeys> {
 			Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
 			return v;
 		});
+		this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
 
 		TemplatesManager.addTemplate(this);
 	}

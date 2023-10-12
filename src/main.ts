@@ -18,7 +18,7 @@ const damageGlypheToValue = {
 	'': 10,
 };
 
-const weaponTemplate = new Template(
+export const weaponTemplate = new Template(
 	'weaponTempate',
 	['┌─', '│', '│ §7Damage §8: §h%d', '│ §7Durability §8: §h%s/%m', '│ ', '└─ '],
 	{
@@ -110,9 +110,9 @@ world.afterEvents.chatSend.subscribe((evt) => {
 		/* 		lp.add('enchant', 'Xp upgarde III\n§gFire Sword I\n§2Poison II');
 		lp.update(evt.sender); */
 
-		const lpWeapon = new LoreParser(item, weaponTemplate);
+		if (lp.hasTemplate(weaponTemplate)) console.warn("true");
 
-		lpWeapon.set('durability', 100)
+		/* lpWeapon.set('durability', 100) */
 
 		return;
 	}
@@ -127,11 +127,16 @@ world.afterEvents.chatSend.subscribe((evt) => {
 
 	lp.initTemplate();
 
-	lp.set('durability', 100);
-	lp.set('maxDurability', 1000);
 	//lp.add('enchant' , 'Xp upgarde III\n§gFire Sword I\n§2Poison II')
 
 	/* 	lp.itemStack.nameTag = 'test\nfazfa'.repeat(20) */
+
+	lp.for(weaponTemplate).set('damage', '§c Not Defined Yet');
+
+	console.warn(lp.hasTemplate(weaponTemplate));
+
+	lp.for(weaponTemplate).set('maxDurability', 1000000);
+	lp.for(weaponTemplate).set('durability', 100000);
 
 	lp.update(evt.sender);
 });
@@ -144,7 +149,7 @@ world.afterEvents.buttonPush.subscribe(({ source }) => {
 	const item = inventory.getItem(player.selectedSlot);
 	const lpWPtemplate = new LoreParser(item, weaponTemplate);
 
-	lpWPtemplate.hasTemplate();
+	/* 	lpWPtemplate.hasTemplate(); */
 });
 
 console.warn('first');

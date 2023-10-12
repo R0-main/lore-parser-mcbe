@@ -9,8 +9,8 @@ export default class TemplatesManager {
 	public static MARKER: string = '§×';
 	public static TEMPLATE_END_MARKER: string = '§∞';
 
-	private static clearRegex: RegExp = new RegExp(`\\${TemplatesManager.MARKER}[^\\${TemplatesManager.MARKER}]+\\${TemplatesManager.MARKER}`, 'g');
-	private static clearColorsRegex: RegExp = new RegExp('/§./', 'gi');
+	private static clearRegex: RegExp = new RegExp(`${TemplatesManager.MARKER}[^${TemplatesManager.MARKER}]+${TemplatesManager.MARKER}`, 'gi');
+	private static clearColorsRegex: RegExp = new RegExp(`§(?!${TemplatesManager.MARKER[1]}|${TemplatesManager.TEMPLATE_END_MARKER[1]}).`, 'gi');
 
 	private static templates: Set<Template<TKeys>> = new Set();
 
@@ -52,19 +52,26 @@ export default class TemplatesManager {
 					// remove all text between Template Marker
 					line = line.replace(TemplatesManager.clearRegex, '');
 					// remove all § + the following char
-					line = line.replace(TemplatesManager.clearColorsRegex, ' ');
+					line = line.replace(TemplatesManager.clearColorsRegex, '');
 					return line;
 				});
-
-				if (loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, ' ') === clearedTemplate.join(' '))
+				console.warn(
+					template.name,
+					' / ',
+					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
+				);
+				console.warn(template.name, ' / ', clearedTemplate.join(' '));
+				if (
+					loreTemplate
+						.join(' ')
+						.replace(TemplatesManager.clearColorsRegex, '')
+						.replace(TemplatesManager.clearRegex, '')
+						.replace(TemplatesManager.clearColorsRegex, '') === clearedTemplate.join(' ')
+				) {
 					templatesMap.set(template.name, template);
+				}
 			}
 		});
 		return templatesMap;
 	}
-
-
-	
-
-
 }

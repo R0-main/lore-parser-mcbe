@@ -29,11 +29,18 @@ class TemplatesManager {
                     // remove all text between Template Marker
                     line = line.replace(TemplatesManager.clearRegex, '');
                     // remove all § + the following char
-                    line = line.replace(TemplatesManager.clearColorsRegex, ' ');
+                    line = line.replace(TemplatesManager.clearColorsRegex, '');
                     return line;
                 });
-                if (loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, ' ') === clearedTemplate.join(' '))
+                console.warn(template.name, ' / ', loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, ''));
+                console.warn(template.name, ' / ', clearedTemplate.join(' '));
+                if (loreTemplate
+                    .join(' ')
+                    .replace(TemplatesManager.clearColorsRegex, '')
+                    .replace(TemplatesManager.clearRegex, '')
+                    .replace(TemplatesManager.clearColorsRegex, '') === clearedTemplate.join(' ')) {
                     templatesMap.set(template.name, template);
+                }
             }
         });
         return templatesMap;
@@ -41,7 +48,7 @@ class TemplatesManager {
 }
 TemplatesManager.MARKER = '§×';
 TemplatesManager.TEMPLATE_END_MARKER = '§∞';
-TemplatesManager.clearRegex = new RegExp(`\\${TemplatesManager.MARKER}[^\\${TemplatesManager.MARKER}]+\\${TemplatesManager.MARKER}`, 'g');
-TemplatesManager.clearColorsRegex = new RegExp('/§./', 'gi');
+TemplatesManager.clearRegex = new RegExp(`${TemplatesManager.MARKER}[^${TemplatesManager.MARKER}]+${TemplatesManager.MARKER}`, 'gi');
+TemplatesManager.clearColorsRegex = new RegExp(`§(?!${TemplatesManager.MARKER[1]}|${TemplatesManager.TEMPLATE_END_MARKER[1]}).`, 'gi');
 TemplatesManager.templates = new Set();
 export default TemplatesManager;

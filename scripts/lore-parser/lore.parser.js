@@ -1,5 +1,6 @@
 import LoreError from './lore.error';
 import TemplatesManager from './templates.manager';
+import TemplateEditor from './template.editor';
 export default class LoreParser {
     constructor(itemStack, template) {
         this.itemStack = itemStack;
@@ -22,35 +23,20 @@ export default class LoreParser {
                 new LoreError(LoreError.types.MAX_LORE_LINE);
         }
     }
-    set(key, value) {
-        const keyValue = this.template.keys[key];
-        let lore = this.currentLore;
-        if (typeof value === 'string' && value?.length > LoreError.MAX_LORE_LINE_LENGTH)
-            return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
-        lore = lore.map((v) => v.replaceAll(keyValue, value.toString()));
-        if (lore.some((line) => line.length > LoreError.MAX_LORE_LINE_LENGTH))
-            return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
-        this.currentLore = lore;
-        this.itemStack.setLore(lore);
-    }
-    get(key) {
-        const keyValue = this.template.keys[key];
-        const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
-        const targetLine = this.currentLore[lineIndex];
-        const keyIndex = this.template.shape[lineIndex].split(TemplatesManager.MARKER).indexOf(keyValue);
-        const value = targetLine.split(TemplatesManager.MARKER);
-        return value[keyIndex] || null;
-    }
     initTemplate() {
         this.currentLore = this.template.shape;
         this.itemStack.setLore(this.currentLore);
+    }
+    for(template) {
+        return new TemplateEditor(template, this.itemStack);
     }
     update(player, slot = player.selectedSlot) {
         // @ts-ignore
         player.getComponent('inventory').container.setItem(slot, this.itemStack);
     }
-    static hasTemplate(lore, template) {
-        const templates = TemplatesManager.getTemplates(lore);
+    hasTemplate(template) {
+        const templates = TemplatesManager.getTemplates(this.currentLore);
+        /* console.warn(templates.get(weaponTemplate.name)) */
         return !!templates.get(template.name);
     }
 }
