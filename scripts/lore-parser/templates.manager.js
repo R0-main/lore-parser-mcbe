@@ -5,6 +5,19 @@ class TemplatesManager {
     static removeTemplate(template) {
         TemplatesManager.templates.delete(template);
     }
+    static isSameTemplate(template1, template2) {
+        return (template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
+            template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, ''));
+    }
+    static getTemplateIndex(template, templates) {
+        const indexes = [];
+        templates.forEach((tpl, index) => {
+            if (TemplatesManager.isSameTemplate(tpl, template.shape)) {
+                indexes.push(index);
+            }
+        });
+        return indexes;
+    }
     static getTemplates(lore) {
         let templatesMap = new Map();
         let loreTemplates = [];
@@ -32,13 +45,13 @@ class TemplatesManager {
                     line = line.replace(TemplatesManager.clearColorsRegex, '');
                     return line;
                 });
-                console.warn(template.name, ' / ', loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, ''));
-                console.warn(template.name, ' / ', clearedTemplate.join(' '));
-                if (loreTemplate
-                    .join(' ')
-                    .replace(TemplatesManager.clearColorsRegex, '')
-                    .replace(TemplatesManager.clearRegex, '')
-                    .replace(TemplatesManager.clearColorsRegex, '') === clearedTemplate.join(' ')) {
+                /* console.warn(
+                    template.name,
+                    ' / ',
+                    loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
+                );
+                console.warn(template.name, ' / ', clearedTemplate.join(' ')); */
+                if (loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')) {
                     templatesMap.set(template.name, template);
                 }
             }

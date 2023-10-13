@@ -11,10 +11,10 @@ export type TTemplate = {
 	options: TOptions;
 };
 
-export default class LoreParser<TTemplate extends Template<TKeys>> {
-	private currentLore: TShape = this.itemStack.getLore() || [];
+export default class LoreParser {
+	public lore: TShape = this.itemStack.getLore() || [];
 
-	constructor(public itemStack: ItemStack, public template: TTemplate) {}
+	constructor(public itemStack: ItemStack) {}
 
 	public add(...strings: Array<string>): void {
 		for (let i = 0; i < strings.length; i++) {
@@ -25,33 +25,33 @@ export default class LoreParser<TTemplate extends Template<TKeys>> {
 				continue;
 			}
 
-			if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE) {
-				this.currentLore = [...this.currentLore, str];
-				this.itemStack.setLore(this.currentLore);
+			if (this.lore.length + strings.length < LoreError.MAX_LORE_LINE) {
+				this.lore = [...this.lore, str];
 				return;
 			} else new LoreError(LoreError.types.MAX_LORE_LINE);
 		}
 	}
 
-	public initTemplate(): void {
-		this.currentLore = this.template.shape;
-		this.itemStack.setLore(this.currentLore);
+	public initTemplates(...templates: Array<Template<TKeys>>): void {
+		this.lore = [];
+		for (const template of templates) {
+			this.lore = [...this.lore, ...template.shape];
+		}
 	}
 
-	
-	public for<T extends Template<TKeys>>(template: T) : TemplateEditor<T> {
-		return new TemplateEditor(template, this.itemStack)
+	public for<T extends Template<TKeys>>(template: T): TemplateEditor<T> {
+		return new TemplateEditor(template, this);
 	}
-	
-	
+
 	public update(player: Player, slot: number = player.selectedSlot): void {
+		console.warn(JSON.stringify(this.lore))
+		this.itemStack.setLore(this.lore)
 		// @ts-ignore
 		player.getComponent('inventory').container.setItem(slot, this.itemStack);
 	}
-	
+
 	public hasTemplate(template: Template<TKeys>): boolean {
-		const templates = TemplatesManager.getTemplates(this.currentLore);
-		/* console.warn(templates.get(weaponTemplate.name)) */
+		const templates = TemplatesManager.getTemplates(this.lore);
 		return !!templates.get(template.name);
 	}
 }

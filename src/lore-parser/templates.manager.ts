@@ -1,5 +1,5 @@
 import { TTemplate } from './lore.parser';
-import Template, { TKeys } from './template';
+import Template, { TKeys, TShape } from './template';
 
 export type TTemplatesObject = {
 	[name: string]: Template<TKeys>;
@@ -20,6 +20,23 @@ export default class TemplatesManager {
 
 	public static removeTemplate(template: Template<TKeys>): void {
 		TemplatesManager.templates.delete(template);
+	}
+
+	public static isSameTemplate(template1: TShape, template2: TShape): boolean {
+		return (
+			template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
+			template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
+		);
+	}
+
+	public static getTemplateIndex(template: Template<TKeys>, templates: Array<TShape>): Array<number> {
+		const indexes: number[] = [];
+		templates.forEach((tpl, index) => {
+			if (TemplatesManager.isSameTemplate(tpl, template.shape)) {
+				indexes.push(index);
+			}
+		});
+		return indexes;
 	}
 
 	public static getTemplates(lore: Array<string>): Map<string, Template<TKeys>> | null {
@@ -55,18 +72,14 @@ export default class TemplatesManager {
 					line = line.replace(TemplatesManager.clearColorsRegex, '');
 					return line;
 				});
-				console.warn(
+				/* console.warn(
 					template.name,
 					' / ',
 					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
 				);
-				console.warn(template.name, ' / ', clearedTemplate.join(' '));
+				console.warn(template.name, ' / ', clearedTemplate.join(' ')); */
 				if (
-					loreTemplate
-						.join(' ')
-						.replace(TemplatesManager.clearColorsRegex, '')
-						.replace(TemplatesManager.clearRegex, '')
-						.replace(TemplatesManager.clearColorsRegex, '') === clearedTemplate.join(' ')
+					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')
 				) {
 					templatesMap.set(template.name, template);
 				}

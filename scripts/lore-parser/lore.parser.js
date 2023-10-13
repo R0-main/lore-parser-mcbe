@@ -2,10 +2,9 @@ import LoreError from './lore.error';
 import TemplatesManager from './templates.manager';
 import TemplateEditor from './template.editor';
 export default class LoreParser {
-    constructor(itemStack, template) {
+    constructor(itemStack) {
         this.itemStack = itemStack;
-        this.template = template;
-        this.currentLore = this.itemStack.getLore() || [];
+        this.lore = this.itemStack.getLore() || [];
     }
     add(...strings) {
         for (let i = 0; i < strings.length; i++) {
@@ -14,29 +13,31 @@ export default class LoreParser {
                 new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
                 continue;
             }
-            if (this.currentLore.length + strings.length < LoreError.MAX_LORE_LINE) {
-                this.currentLore = [...this.currentLore, str];
-                this.itemStack.setLore(this.currentLore);
+            if (this.lore.length + strings.length < LoreError.MAX_LORE_LINE) {
+                this.lore = [...this.lore, str];
                 return;
             }
             else
                 new LoreError(LoreError.types.MAX_LORE_LINE);
         }
     }
-    initTemplate() {
-        this.currentLore = this.template.shape;
-        this.itemStack.setLore(this.currentLore);
+    initTemplates(...templates) {
+        this.lore = [];
+        for (const template of templates) {
+            this.lore = [...this.lore, ...template.shape];
+        }
     }
     for(template) {
-        return new TemplateEditor(template, this.itemStack);
+        return new TemplateEditor(template, this);
     }
     update(player, slot = player.selectedSlot) {
+        console.warn(JSON.stringify(this.lore));
+        this.itemStack.setLore(this.lore);
         // @ts-ignore
         player.getComponent('inventory').container.setItem(slot, this.itemStack);
     }
     hasTemplate(template) {
-        const templates = TemplatesManager.getTemplates(this.currentLore);
-        /* console.warn(templates.get(weaponTemplate.name)) */
+        const templates = TemplatesManager.getTemplates(this.lore);
         return !!templates.get(template.name);
     }
 }

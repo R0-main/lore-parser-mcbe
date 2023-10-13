@@ -104,40 +104,49 @@ world.afterEvents.chatSend.subscribe((evt) => {
 	// @ts-ignore
 	const inventory = evt.sender.getComponent('inventory')?.container as Container;
 	const item = inventory.getItem(evt.sender.selectedSlot);
-	const lp = new LoreParser(item, weaponTemplate);
+	const lp = new LoreParser(item);
 
-	if (evt.message.startsWith('-add')) {
-		/* 		lp.add('enchant', 'Xp upgarde III\n§gFire Sword I\n§2Poison II');
-		lp.update(evt.sender); */
+	lp.initTemplates(armorTemplate, weaponTemplate);
 
-		if (lp.hasTemplate(weaponTemplate)) console.warn("true");
+	/* lp.for(armorTemplate).set('protection', 100)
+	lp.for(armorTemplate).set('durability', 1000); */
 
-		/* lpWeapon.set('durability', 100) */
+	/* console.warn(lp.hasTemplate(armorTemplate)) */
+
+	lp.for(armorTemplate).set('durability', 100);
+
+	/* if (evt.message.startsWith('-add')) {
+
+		if (lp.hasTemplate(weaponTemplate)) {
+			lp.for(weaponTemplate).set('durability', 1);
+			lp.update(evt.sender);
+		} else {
+			lp.for(weaponTemplate).addToLore();
+			lp.for(armorTemplate).addToLore();
+
+			lp.for(weaponTemplate).set('durability', 100);
+			lp.for(armorTemplate).set('protection', 1000000);
+			lp.update(evt.sender);
+		}
+
 
 		return;
 	}
 
-	/* 	if (!evt.message.startsWith('-')) {
 
-
-		lp.get('enchant')
-
-		return
-	}; */
-
+	console.warn(lp.hasTemplate(weaponTemplate))
 	lp.initTemplate();
+
 
 	//lp.add('enchant' , 'Xp upgarde III\n§gFire Sword I\n§2Poison II')
 
-	/* 	lp.itemStack.nameTag = 'test\nfazfa'.repeat(20) */
 
-	lp.for(weaponTemplate).set('damage', '§c Not Defined Yet');
-
-	console.warn(lp.hasTemplate(weaponTemplate));
+	lp.for(weaponTemplate).set('damage', '§cNot Defined Yet');
 
 	lp.for(weaponTemplate).set('maxDurability', 1000000);
 	lp.for(weaponTemplate).set('durability', 100000);
 
+	 */
 	lp.update(evt.sender);
 });
 
@@ -147,7 +156,7 @@ world.afterEvents.buttonPush.subscribe(({ source }) => {
 	// @ts-ignore
 	const inventory = player.getComponent('inventory')?.container as Container;
 	const item = inventory.getItem(player.selectedSlot);
-	const lpWPtemplate = new LoreParser(item, weaponTemplate);
+	const lpWPtemplate = new LoreParser(item);
 
 	/* 	lpWPtemplate.hasTemplate(); */
 });
