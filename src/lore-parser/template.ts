@@ -2,8 +2,8 @@ import LoreParser from './lore.parser';
 import TemplatesManager from './templates.manager';
 
 export type TOptions = {
-	clearLines: boolean;
-	basesColors: string;
+	clearLines?: boolean;
+	basesColors?: string;
 };
 
 export type TShape = Array<string>;
@@ -13,7 +13,7 @@ export type TKeys = Record<string, string>;
 export default class Template<T extends TKeys> {
 	public static CLEAR_LINE: string = '§r';
 
-	constructor(public readonly name: string, private readonly base: TShape, public readonly keys: T, public readonly options?: TOptions) {
+	constructor(public readonly name: string, public base: TShape, public keys: T, public  options?: TOptions) {
 		this.base = this.base.map((v) => {
 			Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
 			return v;

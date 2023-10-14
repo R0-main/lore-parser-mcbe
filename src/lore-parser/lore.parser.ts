@@ -1,9 +1,8 @@
-import { ItemStack, Player } from '@minecraft/server';
+import { EntityInventoryComponent, ItemStack, Player } from '@minecraft/server';
 import Template, { TKeys, TOptions, TShape } from './template';
 import LoreError from './lore.error';
 import TemplatesManager from './templates.manager';
 import TemplateEditor from './template.editor';
-import { weaponTemplate } from 'main';
 
 export type TTemplate = {
 	shape: Array<string>;
@@ -44,10 +43,9 @@ export default class LoreParser {
 	}
 
 	public update(player: Player, slot: number = player.selectedSlot): void {
-		console.warn(JSON.stringify(this.lore))
 		this.itemStack.setLore(this.lore)
-		// @ts-ignore
-		player.getComponent('inventory').container.setItem(slot, this.itemStack);
+		let inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent
+        inventory.container.setItem(slot, this.itemStack)
 	}
 
 	public hasTemplate(template: Template<TKeys>): boolean {

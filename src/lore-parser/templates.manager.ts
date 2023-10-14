@@ -39,6 +39,21 @@ export default class TemplatesManager {
 		return indexes;
 	}
 
+	public static getSeperatedTemplates(lore: TShape): Array<TShape> {
+		let separatedTemplates: Array<string[]> = [];
+		let buffer: Array<string> = [];
+
+		for (const line of lore) {
+			buffer.push(line);
+			if (line.endsWith(TemplatesManager.TEMPLATE_END_MARKER)) {
+				separatedTemplates.push(buffer);
+				buffer = [];
+			}
+		}
+
+		return separatedTemplates
+	}
+
 	public static getTemplates(lore: Array<string>): Map<string, Template<TKeys>> | null {
 		let templatesMap: Map<string, Template<TKeys>> = new Map();
 

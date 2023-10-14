@@ -18,6 +18,18 @@ class TemplatesManager {
         });
         return indexes;
     }
+    static getSeperatedTemplates(lore) {
+        let separatedTemplates = [];
+        let buffer = [];
+        for (const line of lore) {
+            buffer.push(line);
+            if (line.endsWith(TemplatesManager.TEMPLATE_END_MARKER)) {
+                separatedTemplates.push(buffer);
+                buffer = [];
+            }
+        }
+        return separatedTemplates;
+    }
     static getTemplates(lore) {
         let templatesMap = new Map();
         let loreTemplates = [];

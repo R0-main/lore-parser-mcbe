@@ -1,3 +1,4 @@
+import { EntityInventoryComponent } from '@minecraft/server';
 import LoreError from './lore.error';
 import TemplatesManager from './templates.manager';
 import TemplateEditor from './template.editor';
@@ -31,10 +32,9 @@ export default class LoreParser {
         return new TemplateEditor(template, this);
     }
     update(player, slot = player.selectedSlot) {
-        console.warn(JSON.stringify(this.lore));
         this.itemStack.setLore(this.lore);
-        // @ts-ignore
-        player.getComponent('inventory').container.setItem(slot, this.itemStack);
+        let inventory = player.getComponent(EntityInventoryComponent.componentId);
+        inventory.container.setItem(slot, this.itemStack);
     }
     hasTemplate(template) {
         const templates = TemplatesManager.getTemplates(this.lore);
