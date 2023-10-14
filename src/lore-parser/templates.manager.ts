@@ -14,6 +14,14 @@ export default class TemplatesManager {
 
 	private static templates: Set<Template<TKeys>> = new Set();
 
+	public static currentId: number = 0;
+
+	/*
+	 *
+	 * Add/Remove Methods
+	 *
+	 */
+
 	public static addTemplate(template: Template<TKeys>): void {
 		TemplatesManager.templates.add(template);
 	}
@@ -22,12 +30,24 @@ export default class TemplatesManager {
 		TemplatesManager.templates.delete(template);
 	}
 
+	/*
+	 *
+	 * Check Method
+	 *
+	 */
+
 	public static isSameTemplate(template1: TShape, template2: TShape): boolean {
 		return (
 			template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
 			template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
 		);
 	}
+
+	/*
+	 *
+	 * Get Methods
+	 *
+	 */
 
 	public static getTemplateIndex(template: Template<TKeys>, templates: Array<TShape>): Array<number> {
 		const indexes: number[] = [];
@@ -51,11 +71,12 @@ export default class TemplatesManager {
 			}
 		}
 
-		return separatedTemplates
+		return separatedTemplates;
 	}
 
-	public static getTemplates(lore: Array<string>): Map<string, Template<TKeys>> | null {
-		let templatesMap: Map<string, Template<TKeys>> = new Map();
+	public static getTemplates(lore: Array<string>): Set<Template<TKeys>> | null {
+		console.warn(lore)
+		let templatesMap: Set<Template<TKeys>> = new Set();
 
 		let loreTemplates: Array<Array<string>> = [];
 
@@ -88,18 +109,20 @@ export default class TemplatesManager {
 					return line;
 				});
 				/* console.warn(
-					template.name,
+					"1", 
 					' / ',
 					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
 				);
-				console.warn(template.name, ' / ', clearedTemplate.join(' ')); */
+				console.warn("3",  ' / ', clearedTemplate.join(' ')); */
 				if (
 					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')
 				) {
-					templatesMap.set(template.name, template);
+					templatesMap.add(template);
 				}
 			}
 		});
+
+		
 		return templatesMap;
 	}
 }

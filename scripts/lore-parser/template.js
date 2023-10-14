@@ -1,15 +1,16 @@
 import TemplatesManager from './templates.manager';
 class Template {
-    constructor(name, base, keys, options) {
-        this.name = name;
+    constructor(base, keys, options, isComplexTemplate) {
         this.base = base;
         this.keys = keys;
         this.options = options;
+        this.isComplexTemplate = isComplexTemplate;
         this.base = this.base.map((v) => {
             Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
             return v;
         });
-        this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
+        if (!isComplexTemplate)
+            this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
         TemplatesManager.addTemplate(this);
     }
     get shape() {

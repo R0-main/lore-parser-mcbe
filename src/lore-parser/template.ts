@@ -13,12 +13,12 @@ export type TKeys = Record<string, string>;
 export default class Template<T extends TKeys> {
 	public static CLEAR_LINE: string = '§r';
 
-	constructor(public readonly name: string, public base: TShape, public keys: T, public  options?: TOptions) {
+	constructor(public base: TShape, public keys: T, public options?: TOptions, public isComplexTemplate?: boolean) {
 		this.base = this.base.map((v) => {
 			Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
 			return v;
 		});
-		this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
+		if (!isComplexTemplate) this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
 
 		TemplatesManager.addTemplate(this);
 	}

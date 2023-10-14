@@ -1,33 +1,41 @@
-import LoreError from './lore.error';
+import LoreWarning from './lore.warning';
 import TemplatesManager from './templates.manager';
 export default class TemplateEditor {
     constructor(template, loreParserInstance) {
         this.template = template;
         this.loreParserInstance = loreParserInstance;
     }
-    init() {
-        this.loreParserInstance.lore = this.template.shape;
-    }
-    addToLore(index = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore).length || 0) {
-        console.warn(index);
-        const separatedTemplates = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore);
-        this.loreParserInstance.lore = separatedTemplates ? separatedTemplates.flatMap((template, idx) => {
-            if (idx === index)
-                return [...this.template.shape, ...template];
-            return template;
-        }) : this.template.shape;
-    }
+    /*
+     *
+     * Set/Get Methods
+     *
+    */
     set(key, value) {
         const keyValue = this.template.keys[key];
+        const val = value.toString();
         const separatedTemplates = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore);
         const indexs = TemplatesManager.getTemplateIndex(this.template, separatedTemplates);
         let lore = separatedTemplates;
-        for (const index of indexs) {
-            if (typeof value === 'string' && value?.length > LoreError.MAX_LORE_LINE_LENGTH)
-                return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
-            lore[index] = lore[index].map((v) => v.replaceAll(keyValue, value.toString()));
-            if (lore[index].some((line) => line.length > LoreError.MAX_LORE_LINE_LENGTH))
-                return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+        if (!this.template.isComplexTemplate) {
+            for (const index of indexs) {
+                if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH)
+                    return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+                lore[index] = lore[index].map((line) => line.replaceAll(keyValue, val));
+                if (lore[index].some((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH))
+                    return new LoreWarning('MAX_LORE_LINE_LENGTH', index, lore[index].filter((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH)[0].length);
+            }
+        }
+        else {
+            lore = separatedTemplates.flat().map((line, index) => {
+                if (line.includes(keyValue)) {
+                    if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) {
+                        new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+                        return line;
+                    }
+                    return line.replaceAll(keyValue, val);
+                }
+                return line;
+            });
         }
         this.loreParserInstance.lore = lore.flat();
     }

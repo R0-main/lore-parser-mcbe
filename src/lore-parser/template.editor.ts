@@ -1,5 +1,5 @@
 import { ItemStack } from '@minecraft/server';
-import LoreError from './lore.error';
+import LoreWarning from './lore.warning';
 import Template, { TKeys, TShape } from './template';
 import TemplatesManager from './templates.manager';
 import LoreParser from './lore.parser';
@@ -7,35 +7,47 @@ import LoreParser from './lore.parser';
 export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 	constructor(private template: TTemplate, private loreParserInstance: LoreParser) {}
 
-	public init(): void | LoreError {
-		this.loreParserInstance.lore = this.template.shape;
-	}
+	/*
+	 * 
+	 * Set/Get Methods
+	 * 
+	*/
 
-	public addToLore(index: number = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore).length || 0): void | LoreError {
-		console.warn(index)
-		const separatedTemplates : Array<TShape> = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore)
-		
-		this.loreParserInstance.lore = separatedTemplates ? separatedTemplates.flatMap((template, idx)=> {
-			if (idx === index)
-				return [...this.template.shape, ...template]
-			return template
-		}) : this.template.shape;
-	}
-
-	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void | LoreError {
+	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void | LoreWarning {
 		const keyValue = this.template.keys[key as string];
+
+		const val = value.toString();
 
 		const separatedTemplates: Array<TShape> = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore);
 		const indexs: Array<number> = TemplatesManager.getTemplateIndex(this.template, separatedTemplates);
 
-		let lore = separatedTemplates;
+		let lore: Array<TShape> | TShape = separatedTemplates;
 
-		for (const index of indexs) {
-			if (typeof value === 'string' && value?.length > LoreError.MAX_LORE_LINE_LENGTH) return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+		if (!this.template.isComplexTemplate) {
+			for (const index of indexs) {
+				if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
 
-			lore[index] = lore[index].map((v) => v.replaceAll(keyValue, value.toString()));
+				lore[index] = lore[index].map((line) => line.replaceAll(keyValue, val));
 
-			if (lore[index].some((line) => line.length > LoreError.MAX_LORE_LINE_LENGTH)) return new LoreError(LoreError.types.MAX_LORE_LINE_LENGTH);
+				if (lore[index].some((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH))
+					return new LoreWarning(
+						'MAX_LORE_LINE_LENGTH',
+						index,
+						lore[index].filter((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH)[0].length
+					);
+			}
+		} else {
+			lore = separatedTemplates.flat().map((line, index) => {
+				if (line.includes(keyValue)) {
+					if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) {
+						new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+						return line;
+					}
+
+					return line.replaceAll(keyValue, val);
+				}
+				return line;
+			});
 		}
 
 		this.loreParserInstance.lore = lore.flat();
@@ -48,7 +60,7 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 
 		const targetLine = this.loreParserInstance.lore[lineIndex];
 
-		if (!targetLine) return null
+		if (!targetLine) return null;
 
 		const keyIndex = this.template.shape[lineIndex]?.split(TemplatesManager.MARKER)?.indexOf(keyValue);
 

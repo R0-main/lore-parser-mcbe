@@ -1,4 +1,4 @@
-import { world, ItemStack } from '@minecraft/server';
+import { world } from '@minecraft/server';
 import ComplexTemplate from 'lore-parser/complex.template';
 import LoreParser from 'lore-parser/lore.parser';
 import Template from 'lore-parser/template';
@@ -16,115 +16,45 @@ const damageGlypheToValue = {
     '': 9,
     '': 10,
 };
-export const weaponTemplate = new Template('weaponTempate', ['┌─', '│', '│ §7Damage §8: §h%d', '│ §7Durability §8: §h%s/%m', '│ ', '└─ '], {
+export const weaponTemplate = new Template(['┌─', '│', '│ §7Damage §8: §h%d', '│ §7Durability §8: §h%s/%m', '│ ', '└─ '], {
     durability: '%s',
     maxDurability: '%m',
     damage: '%d',
+    damage1: '%d2',
 }, {
     clearLines: true,
     basesColors: '§7',
 });
-const enchantTemplate = new Template('enchantTemplate', ['', '%e', '3', '4', '5', '6', '7', '8', '9'], {
+const enchantTemplate = new Template(['', '%e', '3', '4', '5', '6', '7', '8', '9'], {
     enchant: '%e',
 }, {
     clearLines: true,
     basesColors: '§7',
 });
-const armorTemplate = new Template('armorTemplate', ['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '], {
+const armorTemplate = new Template(['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '], {
     durability: '%s',
     piercing: '%s',
 }, {
     clearLines: true,
     basesColors: '§7',
 });
-/* let test : test<Template> = '' */
-/* for (const player of world.getAllPlayers()) {
-    // @ts-ignore
-    const inventory = player.getComponent('inventory')?.container as Container;
-    const item = inventory.getItem(player.selectedSlot);
-
-    const armorsNames = ['chestplate', 'helmet', 'leggings', 'boots'];
-
-    const isArmor = armorsNames.some((v) => item.typeId.includes(v));
-
-    let loreParser;
-
-    if (armorsNames.some((v) => item.typeId.includes(v))) loreParser = new LoreParser(item, armorTempalte);
-    else loreParser = new LoreParser(item, weaponTemplate);
-
-    loreParser.initTemplate();
-
-    loreParser.set('durability', 100);
-
-    if (isArmor) {
-        loreParser.set('protection', '1900M');
-    } else {
-        const damageGlyphe1 = Object.keys(damageGlypheToValue)[randomIntFromInterval(0, Object.keys(damageGlypheToValue).length - 1)];
-
-        const damage = damageGlyphe + damageGlyphe1;
-
-        damageGlypheToValue['']; // 1000
-
-        loreParser.set('damage', damage);
-    }
-
-    loreParser.get('damage'); // => 10M
-
-    loreParser.update(player);
-} */
-function randomIntFromInterval(min, max) {
-    // min and max included
-    return Math.floor(Math.random() * (max - min + 1) + min);
-}
-const itemTemplate = new ComplexTemplate('itemTemplate', [weaponTemplate, armorTemplate], { clearLines: false }).get();
+const itemTemplate = new ComplexTemplate([weaponTemplate, armorTemplate], { clearLines: true });
 world.afterEvents.chatSend.subscribe((evt) => {
     // @ts-ignore
     const inventory = evt.sender.getComponent('inventory')?.container;
     const item = inventory.getItem(evt.sender.selectedSlot);
-    const lp = new LoreParser(new ItemStack('minecraft:diamond_ore'));
-    lp.initTemplates(itemTemplate);
-    lp.for(itemTemplate).set('');
-    lp.update(evt.sender);
-    // lp.initTemplates(armorTemplate, weaponTemplate);
-    /* lp.for(armorTemplate).set('protection', 100)
-    lp.for(armorTemplate).set('durability', 1000); */
-    /* console.warn(lp.hasTemplate(armorTemplate)) */
-    /* console.warn(lp.for(armorTemplate).get('durability')) */
-    /* lp.for(weaponTemplate).addToLore(); */
-    /* if (evt.message.startsWith('-add')) {
-
-        if (lp.hasTemplate(weaponTemplate)) {
-            lp.for(weaponTemplate).set('durability', 1);
-            lp.update(evt.sender);
-        } else {
-            lp.for(weaponTemplate).addToLore();
-            lp.for(armorTemplate).addToLore();
-
-            lp.for(weaponTemplate).set('durability', 100);
-            lp.for(armorTemplate).set('protection', 1000000);
-            lp.update(evt.sender);
-        }
-
-
-        return;
-    }
-
-    
-
-
-    console.warn(lp.hasTemplate(weaponTemplate))
-    lp.initTemplate();
-
-
-    //lp.add('enchant' , 'Xp upgarde III\n§gFire Sword I\n§2Poison II')
-
-
-    lp.for(weaponTemplate).set('damage', '§cNot Defined Yet');
-
-    lp.for(weaponTemplate).set('maxDurability', 1000000);
-    lp.for(weaponTemplate).set('durability', 100000);
-
-     */
+    const lp = new LoreParser(item);
+    lp.add('Testing Line');
+    lp.edit(0, 'Line edited');
+    lp.push(3, 'Pushed Line');
+    lp.remove(3);
+    lp.for(weaponTemplate).set('damage', 1000);
+    lp.for(weaponTemplate).get('damage'); // 1000
+    lp.getTemplates(); // [weaponTemplate]
+    lp.hasTemplates(weaponTemplate); // true
+    lp.hasTemplates(weaponTemplate, armorTemplate); // false
+    lp.pushTemplates(armorTemplate);
+    lp.initTemplates(enchantTemplate);
     lp.update(evt.sender);
 });
 world.afterEvents.buttonPush.subscribe(({ source }) => {
@@ -133,20 +63,20 @@ world.afterEvents.buttonPush.subscribe(({ source }) => {
     const inventory = player.getComponent('inventory')?.container;
     const item = inventory.getItem(player.selectedSlot);
     const lp = new LoreParser(item);
-    if (lp.hasTemplate(rarityTamplate) && lp.hasTemplate(descTamplate))
+    if (lp.hasTemplates(rarityTamplate) && lp.hasTemplates(descTamplate))
         return player.sendMessage('§cVous avez déjà un item custom');
     lp.initTemplates(rarityTamplate, descTamplate);
     lp.for(rarityTamplate).set('rarity', 100);
     lp.for(descTamplate).set('description', 'Cette item rename le mob tapé avec');
     lp.update(player);
 });
-world.afterEvents.entityHitEntity.subscribe(evt => {
+world.afterEvents.entityHitEntity.subscribe((evt) => {
     const player = evt.damagingEntity;
     // @ts-ignore
     const inventory = player.getComponent('inventory')?.container;
     const item = inventory.getItem(player.selectedSlot);
     const lp = new LoreParser(item);
-    if (!lp.hasTemplate(rarityTamplate) && !lp.hasTemplate(descTamplate))
+    if (!lp.hasTemplates(rarityTamplate) && !lp.hasTemplates(descTamplate))
         return;
     const damage = lp.for(rarityTamplate).get('rarity');
     evt.hitEntity.applyDamage(parseInt(damage));

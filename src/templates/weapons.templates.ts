@@ -1,7 +1,6 @@
 import Template from "lore-parser/template";
 
 export const rarityTamplate = new Template(
-	'rarityTemplate',
 	["La rareté de l'arme est %r"],
 	{
 		rarity: '%r',
@@ -13,7 +12,6 @@ export const rarityTamplate = new Template(
 );
 
 export const descTamplate = new Template(
-	'descTamplate',
 	['', '%d'],
 	{
 		description: '%d',

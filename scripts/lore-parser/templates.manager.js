@@ -1,14 +1,29 @@
 class TemplatesManager {
+    /*
+     *
+     * Add/Remove Methods
+     *
+     */
     static addTemplate(template) {
         TemplatesManager.templates.add(template);
     }
     static removeTemplate(template) {
         TemplatesManager.templates.delete(template);
     }
+    /*
+     *
+     * Check Method
+     *
+     */
     static isSameTemplate(template1, template2) {
         return (template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
             template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, ''));
     }
+    /*
+     *
+     * Get Methods
+     *
+     */
     static getTemplateIndex(template, templates) {
         const indexes = [];
         templates.forEach((tpl, index) => {
@@ -31,7 +46,8 @@ class TemplatesManager {
         return separatedTemplates;
     }
     static getTemplates(lore) {
-        let templatesMap = new Map();
+        console.warn(lore);
+        let templatesMap = new Set();
         let loreTemplates = [];
         let clearedLore = lore.map((line) => line.replace(TemplatesManager.clearRegex, ''));
         const multipleTemplates = clearedLore.findIndex((line) => line.includes(TemplatesManager.TEMPLATE_END_MARKER));
@@ -58,13 +74,13 @@ class TemplatesManager {
                     return line;
                 });
                 /* console.warn(
-                    template.name,
+                    "1",
                     ' / ',
                     loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
                 );
-                console.warn(template.name, ' / ', clearedTemplate.join(' ')); */
+                console.warn("3",  ' / ', clearedTemplate.join(' ')); */
                 if (loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')) {
-                    templatesMap.set(template.name, template);
+                    templatesMap.add(template);
                 }
             }
         });
@@ -76,4 +92,5 @@ TemplatesManager.TEMPLATE_END_MARKER = '§∞';
 TemplatesManager.clearRegex = new RegExp(`${TemplatesManager.MARKER}[^${TemplatesManager.MARKER}]+${TemplatesManager.MARKER}`, 'gi');
 TemplatesManager.clearColorsRegex = new RegExp(`§(?!${TemplatesManager.MARKER[1]}|${TemplatesManager.TEMPLATE_END_MARKER[1]}).`, 'gi');
 TemplatesManager.templates = new Set();
+TemplatesManager.currentId = 0;
 export default TemplatesManager;
