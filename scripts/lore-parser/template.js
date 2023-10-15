@@ -5,25 +5,29 @@ class Template {
         this.keys = keys;
         this.options = options;
         this.isComplexTemplate = isComplexTemplate;
-        this.base = this.base.map((v) => {
-            Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
-            return v;
-        });
-        if (!isComplexTemplate)
+        if (!isComplexTemplate) {
+            this.base = this.base.map((v) => {
+                Object.values(this.keys).forEach((key) => (v = v.replaceAll(key, TemplatesManager.MARKER + key + TemplatesManager.MARKER)));
+                return v;
+            });
             this.base[this.base.length - 1] = this.base[this.base.length - 1] + TemplatesManager.TEMPLATE_END_MARKER;
+        }
         TemplatesManager.addTemplate(this);
     }
     get shape() {
-        return Template.handlerOptions(this.base, this.options);
+        return this.handlerOptions();
     }
-    static handlerOptions(base, options) {
-        let shape = base;
-        if (options.basesColors)
-            shape = shape.map((str) => options.basesColors + str);
-        if (options.clearLines)
+    handlerOptions() {
+        let shape = this.base;
+        if (!this.options)
+            return shape;
+        if (this.options?.basesColors)
+            shape = shape.map((str) => this.options.basesColors + str);
+        if (this.options?.clearLines)
             shape = shape.map((str) => Template.CLEAR_LINE + str);
         return shape;
     }
 }
 Template.CLEAR_LINE = '§r';
+Template.DEFAULT_OPTIONS = {};
 export default Template;

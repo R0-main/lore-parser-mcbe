@@ -9,7 +9,7 @@ export default class TemplateEditor {
      *
      * Set/Get Methods
      *
-    */
+     */
     set(key, value) {
         const keyValue = this.template.keys[key];
         const val = value.toString();
@@ -18,7 +18,7 @@ export default class TemplateEditor {
         let lore = separatedTemplates;
         if (!this.template.isComplexTemplate) {
             for (const index of indexs) {
-                if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH)
+                if (val.length + lore[index].length > LoreWarning.MAX_LORE_LINE_LENGTH)
                     return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
                 lore[index] = lore[index].map((line) => line.replaceAll(keyValue, val));
                 if (lore[index].some((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH))
@@ -28,8 +28,8 @@ export default class TemplateEditor {
         else {
             lore = separatedTemplates.flat().map((line, index) => {
                 if (line.includes(keyValue)) {
-                    if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) {
-                        new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+                    if (val.length + line.length > LoreWarning.MAX_LORE_LINE_LENGTH) {
+                        new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length + line.length);
                         return line;
                     }
                     return line.replaceAll(keyValue, val);
@@ -42,11 +42,11 @@ export default class TemplateEditor {
     get(key) {
         const keyValue = this.template.keys[key];
         const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
-        const targetLine = this.loreParserInstance.lore[lineIndex];
-        if (!targetLine)
+        if (this.loreParserInstance.lore.length <= lineIndex)
             return null;
+        const targetLine = this.loreParserInstance.lore[lineIndex];
         const keyIndex = this.template.shape[lineIndex]?.split(TemplatesManager.MARKER)?.indexOf(keyValue);
-        const value = targetLine?.split(TemplatesManager.MARKER);
+        const value = targetLine.split(TemplatesManager.MARKER);
         return value[keyIndex] || null;
     }
 }

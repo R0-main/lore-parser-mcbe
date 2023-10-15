@@ -50,7 +50,7 @@ const armorTemplate = new Template(
 	['┌─', '│', '│ §7Durability §8: §h%s', '│ §7Protection §8: §h%p', '│ ', '└─ '],
 	{
 		durability: '%s',
-		piercing: '%s',
+		protection: '%p',
 	},
 	{
 		clearLines: true,
@@ -66,7 +66,7 @@ world.afterEvents.chatSend.subscribe((evt) => {
 	const item = inventory.getItem(evt.sender.selectedSlot);
 
 	const lp = new LoreParser(item);
-
+	/* 
 	lp.add('Testing Line');
 
 	lp.edit(0, 'Line edited');
@@ -84,12 +84,52 @@ world.afterEvents.chatSend.subscribe((evt) => {
 	lp.hasTemplates(weaponTemplate); // true
 	lp.hasTemplates(weaponTemplate, armorTemplate); // false
 
-	lp.pushTemplates(armorTemplate);
+	lp.pushTemplates(3, armorTemplate); */
 
-	lp.initTemplates(enchantTemplate);
+	/* lp.addTemplates(armorTemplate) */
+	lp.removeTemplates(armorTemplate);
+
+	console.warn(lp.hasTemplates(armorTemplate));
+
+	/* lp.initTemplates(armorTemplate, weaponTemplate);
+
+	lp.for(armorTemplate).set('durability', 1000) */
 
 	lp.update(evt.sender);
 });
+
+const rarityTemplate = new Template(
+	[
+		'┌─', 
+		'│', 
+		'│ §hRarity §8-> %r', 
+		'│ ', 
+		'└─ '
+	],
+	{
+		rarity: '%r',
+	},
+	{
+		clearLines: true,
+		basesColors: '§7',
+	}
+);
+
+const durabilityTemplate = new Template(
+	[
+		'(%durability/%maxDurability)'
+	],
+	{
+		durability: '%durability',
+		maxDurability: '%maxDurability',
+	},
+	{
+		clearLines: true,
+		basesColors: '§7',
+	}
+);
+
+const itemTpl = new ComplexTemplate([rarityTemplate, durabilityTemplate]);
 
 world.afterEvents.buttonPush.subscribe(({ source }) => {
 	const player = source as Player;
@@ -99,13 +139,13 @@ world.afterEvents.buttonPush.subscribe(({ source }) => {
 	const item = inventory.getItem(player.selectedSlot);
 	const lp = new LoreParser(item);
 
-	if (lp.hasTemplates(rarityTamplate) && lp.hasTemplates(descTamplate)) return player.sendMessage('§cVous avez déjà un item custom');
+	if (lp.hasTemplates(itemTpl)) return player.sendMessage('§cVous avez déjà un item custom');
 
-	lp.initTemplates(rarityTamplate, descTamplate);
+	lp.initTemplates(itemTpl);
 
-	lp.for(rarityTamplate).set('rarity', 100);
-
-	lp.for(descTamplate).set('description', 'Cette item rename le mob tapé avec');
+	lp.for(itemTpl).set('rarity', '§eLegendray');
+	lp.for(itemTpl).set('durability', 100);
+	lp.for(itemTpl).set('maxDurability', 110);
 
 	lp.update(player);
 });
@@ -118,11 +158,13 @@ world.afterEvents.entityHitEntity.subscribe((evt) => {
 	const item = inventory.getItem(player.selectedSlot);
 	const lp = new LoreParser(item);
 
-	if (!lp.hasTemplates(rarityTamplate) && !lp.hasTemplates(descTamplate)) return;
+	if (!lp.hasTemplates(itemTpl)) return player.sendMessage("§tTu n'a pas d'item custom");
 
-	const damage = lp.for(rarityTamplate).get('rarity');
+	const damage = 1;
 
-	evt.hitEntity.applyDamage(parseInt(damage));
+	console.warn(lp.for(itemTpl).get('rarity'));
+
+	evt.hitEntity.applyDamage(damage);
 
 	evt.hitEntity.dimension.spawnParticle('minecraft:soul_particle', evt.hitEntity.location);
 });

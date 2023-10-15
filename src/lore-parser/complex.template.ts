@@ -10,8 +10,9 @@ export default class ComplexTemplate<TTemplates extends Array<Template<TKeys>>> 
 
 	public readonly template: Template<TCombinedKeys<TTemplates>>;
 
-	constructor(public readonly templates: TTemplates, public readonly options?: TOptions) {
+	constructor(public readonly templates: TTemplates, options: TOptions = Template.DEFAULT_OPTIONS) {
 		let keys: TCombinedKeys<TTemplates> = {} as TCombinedKeys<TTemplates>;
+		let opts: TOptions = {};
 
 		for (const template of templates) {
 			for (const key in template.keys) {
@@ -19,10 +20,10 @@ export default class ComplexTemplate<TTemplates extends Array<Template<TKeys>>> 
 					keys[key] = template.keys[key];
 				}
 			}
+			opts = { ...options, ...template.options };
 		}
 		let base = templates.reduce((acc, template) => acc.concat(template.base), [] as TShape);
-
-		super(base, keys, options, true);
+		super(base, keys, opts, true);
 	}
 }
 

@@ -75,12 +75,29 @@ export default class LoreParser {
             this.lore = [...this.lore, ...template.shape];
         }
     }
-    pushTemplates(...templates) {
+    pushTemplates(index, ...templates) {
+        const length = this.lore.length + templates.map((v) => v.shape.length).reduce((accumulator, curr) => accumulator + curr);
+        if (length > LoreWarning.MAX_LORE_LINE)
+            return new LoreWarning('MAX_LORE_LINE', length);
+        let separatedLore = TemplatesManager.getSeperatedTemplates(this.lore);
+        for (const template of templates) {
+            separatedLore.splice(index, 0, template.shape);
+            this.lore = separatedLore.flat();
+        }
+    }
+    addTemplates(...templates) {
         const length = this.lore.length + templates.map((v) => v.shape.length).reduce((accumulator, curr) => accumulator + curr);
         if (length > LoreWarning.MAX_LORE_LINE)
             return new LoreWarning('MAX_LORE_LINE', length);
         for (const template of templates) {
             this.lore = [...this.lore, ...template.shape];
+        }
+    }
+    removeTemplates(...templates) {
+        let separatedLore = TemplatesManager.getSeperatedTemplates(this.lore);
+        for (const template of templates) {
+            separatedLore = separatedLore.filter((tpl) => !TemplatesManager.isSameTemplate(tpl, template.shape));
+            this.lore = separatedLore.flat();
         }
     }
     /*
@@ -100,13 +117,21 @@ export default class LoreParser {
      */
     hasTemplates(...templates) {
         let result = false;
+        const separatedTemplates = TemplatesManager.getSeperatedTemplates(this.lore);
+        if (separatedTemplates.length === 0)
+            return false;
         for (const template of templates) {
             if (!template.isComplexTemplate) {
-                const templates = TemplatesManager.getTemplates(this.lore);
-                result = !!templates.has(template);
+                const templateIndex = TemplatesManager.getTemplateIndex(template, separatedTemplates);
+                if (separatedTemplates.length > 0 && templateIndex.length > 0) {
+                    result = true;
+                }
+                else {
+                    result = false;
+                }
             }
             else {
-                result = TemplatesManager.isSameTemplate(template.shape, this.lore);
+                result = TemplatesManager.isSameTemplate(separatedTemplates.flat(), template.shape);
             }
         }
         return result;

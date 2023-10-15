@@ -1,0 +1,4 @@
+./scripts
+./node_modules
+./build.bat
+*.js

@@ -1,4 +1,3 @@
-import { ItemStack } from '@minecraft/server';
 import LoreWarning from './lore.warning';
 import Template, { TKeys, TShape } from './template';
 import TemplatesManager from './templates.manager';
@@ -8,10 +7,10 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 	constructor(private template: TTemplate, private loreParserInstance: LoreParser) {}
 
 	/*
-	 * 
+	 *
 	 * Set/Get Methods
-	 * 
-	*/
+	 *
+	 */
 
 	public set(key: keyof TTemplate['keys'], value: string | number | boolean): void | LoreWarning {
 		const keyValue = this.template.keys[key as string];
@@ -25,7 +24,7 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 
 		if (!this.template.isComplexTemplate) {
 			for (const index of indexs) {
-				if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+				if (val.length + lore[index].length > LoreWarning.MAX_LORE_LINE_LENGTH) return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
 
 				lore[index] = lore[index].map((line) => line.replaceAll(keyValue, val));
 
@@ -39,8 +38,8 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 		} else {
 			lore = separatedTemplates.flat().map((line, index) => {
 				if (line.includes(keyValue)) {
-					if (val.length >= LoreWarning.MAX_LORE_LINE_LENGTH) {
-						new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
+					if (val.length + line.length > LoreWarning.MAX_LORE_LINE_LENGTH) {
+						new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length + line.length);
 						return line;
 					}
 
@@ -58,13 +57,13 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 
 		const lineIndex = this.template.shape.findIndex((v) => v.includes(keyValue));
 
-		const targetLine = this.loreParserInstance.lore[lineIndex];
+		if (this.loreParserInstance.lore.length <= lineIndex) return null;
 
-		if (!targetLine) return null;
+		const targetLine = this.loreParserInstance.lore[lineIndex];
 
 		const keyIndex = this.template.shape[lineIndex]?.split(TemplatesManager.MARKER)?.indexOf(keyValue);
 
-		const value = targetLine?.split(TemplatesManager.MARKER);
+		const value = targetLine.split(TemplatesManager.MARKER);
 
 		return value[keyIndex] || null;
 	}

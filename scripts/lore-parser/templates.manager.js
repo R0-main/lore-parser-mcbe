@@ -16,8 +16,8 @@ class TemplatesManager {
      *
      */
     static isSameTemplate(template1, template2) {
-        return (template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
-            template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, ''));
+        return (TemplatesManager.getClearedShape(template1) ==
+            TemplatesManager.getClearedShape(template2));
     }
     /*
      *
@@ -45,8 +45,10 @@ class TemplatesManager {
         }
         return separatedTemplates;
     }
+    static getClearedShape(shape) {
+        return shape.join(' ').replaceAll(TemplatesManager.clearColorsRegex, '').replaceAll(TemplatesManager.clearRegex, '').replaceAll(TemplatesManager.MARKER, '').trim();
+    }
     static getTemplates(lore) {
-        console.warn(lore);
         let templatesMap = new Set();
         let loreTemplates = [];
         let clearedLore = lore.map((line) => line.replace(TemplatesManager.clearRegex, ''));
@@ -66,20 +68,7 @@ class TemplatesManager {
         }
         TemplatesManager.templates.forEach((template) => {
             for (const loreTemplate of loreTemplates) {
-                const clearedTemplate = template.shape.map((line) => {
-                    // remove all text between Template Marker
-                    line = line.replace(TemplatesManager.clearRegex, '');
-                    // remove all § + the following char
-                    line = line.replace(TemplatesManager.clearColorsRegex, '');
-                    return line;
-                });
-                /* console.warn(
-                    "1",
-                    ' / ',
-                    loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
-                );
-                console.warn("3",  ' / ', clearedTemplate.join(' ')); */
-                if (loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')) {
+                if (TemplatesManager.isSameTemplate(template.shape, loreTemplate)) {
                     templatesMap.add(template);
                 }
             }
@@ -90,7 +79,6 @@ class TemplatesManager {
 TemplatesManager.MARKER = '§×';
 TemplatesManager.TEMPLATE_END_MARKER = '§∞';
 TemplatesManager.clearRegex = new RegExp(`${TemplatesManager.MARKER}[^${TemplatesManager.MARKER}]+${TemplatesManager.MARKER}`, 'gi');
-TemplatesManager.clearColorsRegex = new RegExp(`§(?!${TemplatesManager.MARKER[1]}|${TemplatesManager.TEMPLATE_END_MARKER[1]}).`, 'gi');
+TemplatesManager.clearColorsRegex = new RegExp(`§[^${TemplatesManager.MARKER}${TemplatesManager.TEMPLATE_END_MARKER}]`, "gi");
 TemplatesManager.templates = new Set();
-TemplatesManager.currentId = 0;
 export default TemplatesManager;

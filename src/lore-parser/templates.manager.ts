@@ -1,4 +1,3 @@
-import { TTemplate } from './lore.parser';
 import Template, { TKeys, TShape } from './template';
 
 export type TTemplatesObject = {
@@ -10,11 +9,9 @@ export default class TemplatesManager {
 	public static TEMPLATE_END_MARKER: string = '§∞';
 
 	private static clearRegex: RegExp = new RegExp(`${TemplatesManager.MARKER}[^${TemplatesManager.MARKER}]+${TemplatesManager.MARKER}`, 'gi');
-	private static clearColorsRegex: RegExp = new RegExp(`§(?!${TemplatesManager.MARKER[1]}|${TemplatesManager.TEMPLATE_END_MARKER[1]}).`, 'gi');
+	private static clearColorsRegex: RegExp = new RegExp(`§[^${TemplatesManager.MARKER}${TemplatesManager.TEMPLATE_END_MARKER}]`, "gi");
 
 	private static templates: Set<Template<TKeys>> = new Set();
-
-	public static currentId: number = 0;
 
 	/*
 	 *
@@ -38,8 +35,8 @@ export default class TemplatesManager {
 
 	public static isSameTemplate(template1: TShape, template2: TShape): boolean {
 		return (
-			template1.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') ==
-			template2.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
+			TemplatesManager.getClearedShape(template1) ==
+			TemplatesManager.getClearedShape(template2)
 		);
 	}
 
@@ -74,8 +71,11 @@ export default class TemplatesManager {
 		return separatedTemplates;
 	}
 
+	public static getClearedShape(shape: TShape): string {
+		return shape.join(' ').replaceAll(TemplatesManager.clearColorsRegex, '').replaceAll(TemplatesManager.clearRegex, '').replaceAll(TemplatesManager.MARKER, '').trim();
+	}
+
 	public static getTemplates(lore: Array<string>): Set<Template<TKeys>> | null {
-		console.warn(lore)
 		let templatesMap: Set<Template<TKeys>> = new Set();
 
 		let loreTemplates: Array<Array<string>> = [];
@@ -101,28 +101,12 @@ export default class TemplatesManager {
 
 		TemplatesManager.templates.forEach((template) => {
 			for (const loreTemplate of loreTemplates) {
-				const clearedTemplate = template.shape.map((line) => {
-					// remove all text between Template Marker
-					line = line.replace(TemplatesManager.clearRegex, '');
-					// remove all § + the following char
-					line = line.replace(TemplatesManager.clearColorsRegex, '');
-					return line;
-				});
-				/* console.warn(
-					"1", 
-					' / ',
-					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '')
-				);
-				console.warn("3",  ' / ', clearedTemplate.join(' ')); */
-				if (
-					loreTemplate.join(' ').replace(TemplatesManager.clearColorsRegex, '').replace(TemplatesManager.clearRegex, '') === clearedTemplate.join(' ')
-				) {
+				if (TemplatesManager.isSameTemplate(template.shape, loreTemplate)) {
 					templatesMap.add(template);
 				}
 			}
 		});
 
-		
 		return templatesMap;
 	}
 }
