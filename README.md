@@ -167,12 +167,51 @@ or with the examples shown above
 lp.initTemplates(itemTemplate);
 ```
 
-then you 
+then you are able to set and get values with 'for' methods, the passed args is the template you want to set and get values from.
+In this exemple, set the value 100 for 'durability' in the itemTemplate.
 
+note : with typescript, autocomplete is enable for set the key (here 'durability')
 
+```ts
+lp.for(itemTemplate).set('durability', 100)
+```
 
+then to get the value you can : 
 
+```ts
+lp.for(itemTemplate).get('durability') // 100
+```
 
+### Templates Utils Methods
+
+### Check Templates
+
+You can check if the item in the lore parser have templates inited : 
+```ts
+loreParser.hasTemplates(itemTemplate, rarityTemplate); // true
+```
+```ts
+loreParser.hasTemplates(rarityTemplate); // true
+```
+```ts
+loreParser.hasTemplates(randomTemplate, itemTemplate); // false
+```
+
+### Templates Random Methods
+
+## Add Templates
+
+This methods add passed template to the end of the item lore.
+```ts
+loreParser.addTemplates(rarityTemplates, itemTemplates);
+```
+
+## Add Templates
+
+This methods add passed template to the end of the item lore.
+```ts
+loreParser.addTemplates(rarityTemplates, itemTemplates);
+```
 
 
 
