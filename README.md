@@ -1,7 +1,7 @@
 # lore-parser-mcbe
 This is a lore parser for minecraft bedrock edition that allow to manage item lore easly
 
-# How to use
+# How to Use
 
 First of all, this lore parser is templates oriented. You are able to edit the lore easely with simple methods but, you can also create templates to manage information in lore, without having to remove all visual stuff ...
 
