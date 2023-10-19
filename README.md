@@ -5,15 +5,94 @@ This is a lore parser for minecraft bedrock edition that allow to manage item lo
 
 First of all, this lore parser is templates oriented. You are able to edit the lore easely with simple methods but, you can also create templates to manage information in lore, without having to remove all visual stuff ...
 
-To manage your lore as you wants, you first need to create a lore parser instance : 
+In this exemple, we will define an new chat event that will set the lore to the current holded item, en then when a player will hit a mob, damages and effect will be added. These damages and effect will be stored in the lore.
+
 
 ```ts
-import LoreParser from 'lore-parser/lore.parser';
+// first we define a new template, that will store damages and effect.
+const swordTemplate = new Template(
+	[
+		// make sur each line of this array is shorter than 50 character and the array need to be shorter than 20 lines
+		'┌─', 
+		'│', 
+		'│ §hDamage §8->§c %d', 
+		'│ §hEffect §8->§e %e', 
+		'│ ', 
+		'└─ '
+	],
+	{
+		damage: '%d', // here all '%d' in the array right above will be replace by setted 'damage' value
+		effect: '%e', // here all '%e' in the array right above will be replace by setted 'effect' value
+	},
+	{
+		clearLines: true, // this option will set '§r' before each lore line to set them clear
+		basesColors: '§7', // this option will add '§7' before each lore line
+	}
+);
 
-const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
-const item = inventory.container.getItem(0);
-const loreParser = new LoreParser(item);
+/*
 
+	Chat Send Event 
+		- in this event we will manage the lore of the holded item to apply the correct lore to store custom data as damage or effect. 
+		
+*/
+world.afterEvents.chatSend.subscribe((evt) => {
+	// setup all needed variables as inventory but in particular item
+	const player: Player = evt.sender;
+	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
+	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
+
+
+	// also create a LoreParser instance to manage the lore properly
+	const lp = new LoreParser(item);
+
+	// test if the item has already the swordTemplate inited
+	if (lp.hasTemplates(swordTemplate)) return player.sendMessage('§cYour item already has the "swordTemplate" inited ');
+
+	// else, clear the lore to be sur it is a clean lore
+	lp.clear();
+
+	// init swordTemplate to make sur we can next set values
+	lp.initTemplates(swordTemplate);
+
+	// then, define the 'damage' and 'effect'
+	lp.for(swordTemplate).set('damage', 10);
+	lp.for(swordTemplate).set('effect', 'levitation');
+
+	// to finish update the item lore into player's inventory
+	lp.update(player);
+});
+
+/*
+
+	Entity Hit Entity Event 
+		- in this event we will apply damage and effect to hitEntity stored in the lore
+
+*/
+world.afterEvents.entityHitEntity.subscribe((evt) => {
+	// check if the damagingEntity is a Player
+	if (!(evt.damagingEntity instanceof Player)) return;
+
+	// setup all needed variables as inventory but in particular item
+	const player = evt.damagingEntity as Player;
+	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
+	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
+
+	// also create a LoreParser instance to manage/read the lore properly
+	const lp = new LoreParser(item);
+
+	// test if the item has the swordTemplate inited
+	if (!lp.hasTemplates(swordTemplate)) return;
+
+	// read the stored values
+	const damage = lp.for(swordTemplate).get('damage');
+	const effect = lp.for(swordTemplate).get('effect');
+
+	// apply damage for 'damageEntity' (we have to convert the damage variable into number because lore parser gives a string value)
+	evt.hitEntity.applyDamage(Number(damage));
+	// apply the stored effect for 'damageEntity'
+	evt.hitEntity.addEffect(effect, 100);
+});
 ```
 
 ## Basics Methods
@@ -160,11 +239,11 @@ Here, 'itemTemplate' regroup 'rarityTemplate' and 'durabilityTemplate', so when 
 To start working with templates, you need to initialize them in the lore parser
 
 ```ts
-lp.initTemplates(rarityTemplate, durabilityTemplate);
+loreParser.initTemplates(rarityTemplate, durabilityTemplate);
 ```
 or with the examples shown above
 ```ts
-lp.initTemplates(itemTemplate);
+loreParser.initTemplates(itemTemplate);
 ```
 
 then you are able to set and get values with 'for' methods, the passed args is the template you want to set and get values from.
@@ -173,16 +252,16 @@ In this exemple, set the value 100 for 'durability' in the itemTemplate.
 note : with typescript, autocomplete is enable for set the key (here 'durability')
 
 ```ts
-lp.for(itemTemplate).set('durability', 100)
+loreParser.for(itemTemplate).set('durability', 100)
 ```
 
 then to get the value you can : 
 
 ```ts
-lp.for(itemTemplate).get('durability') // 100
+loreParser.for(itemTemplate).get('durability') // 100
 ```
 
-### Templates Utils Methods
+## Templates Utils Methods
 
 ### Check Templates
 
@@ -197,20 +276,48 @@ loreParser.hasTemplates(rarityTemplate); // true
 loreParser.hasTemplates(randomTemplate, itemTemplate); // false
 ```
 
-### Templates Random Methods
+## Templates Random Methods
 
-## Add Templates
+### Add Templates
 
-This methods add passed template to the end of the item lore.
+This methods add passed template(s) to the end of the item lore.
+```ts
+loreParser.addTemplates(rarityTemplates);
+```
 ```ts
 loreParser.addTemplates(rarityTemplates, itemTemplates);
 ```
 
-## Add Templates
+### Push Templates
 
-This methods add passed template to the end of the item lore.
+This methods add passed template(s) to the specified index (index is template index and not the line index)
 ```ts
-loreParser.addTemplates(rarityTemplates, itemTemplates);
+loreParser.pushTemplates(1, itemTemplate)
+```
+```ts
+loreParser.pushTemplates(2, itemTemplate, randomTemplates)
+```
+
+### Remove Templates
+
+This methods removed all passed template(s) to the item lore
+```ts
+loreParser.removeTemplates(itemTemplate)
+```
+```ts
+loreParser.removeTemplates(itemTemplate, rarityTemplate)
+```
+
+# ⚠️ Important
+
+You have to call 'update' method to set the item's lore correcly.
+
+```ts
+loreParser.update(player)
+```
+you can also select the slot, by default the slot is setted to 'player.selectedSlot'
+```ts
+loreParser.update(player, 6)
 ```
 
 
