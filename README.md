@@ -9,6 +9,10 @@ In this exemple, we will define an new chat event that will set the lore to the 
 
 
 ```ts
+import { world, ItemStack, Player, EntityInventoryComponent } from '@minecraft/server';
+import LoreParser from 'lore-parser/lore.parser';
+import Template from 'lore-parser/template';
+
 // first we define a new template, that will store damages and effect.
 const swordTemplate = new Template(
 	[
