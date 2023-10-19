@@ -13,12 +13,12 @@ In this exemple, we will define an new chat event that will set the lore to the 
 const swordTemplate = new Template(
 	[
 		// make sur each line of this array is shorter than 50 character and the array need to be shorter than 20 lines
-		'┌─', 
-		'│', 
-		'│ §hDamage §8->§c %d', 
-		'│ §hEffect §8->§e %e', 
-		'│ ', 
-		'└─ '
+		'┌─',
+		'│',
+		'│ §hDamage §8->§c %d',
+		'│ §hEffect §8->§e %e',
+		'│ ',
+		'└─ ',
 	],
 	{
 		damage: '%d', // here all '%d' in the array right above will be replace by setted 'damage' value
@@ -42,12 +42,14 @@ world.afterEvents.chatSend.subscribe((evt) => {
 	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
 	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
 
+	// test if player hold an item
+	if (!item) return player.sendMessage('§cYou need to hold an item');
 
 	// also create a LoreParser instance to manage the lore properly
 	const lp = new LoreParser(item);
 
 	// test if the item has already the swordTemplate inited
-	if (lp.hasTemplates(swordTemplate)) return player.sendMessage('§cYour item already has the "swordTemplate" inited ');
+	if (lp.hasTemplates(swordTemplate)) return player.sendMessage('§cYour item already has the "swordTemplate" inited');
 
 	// else, clear the lore to be sur it is a clean lore
 	lp.clear();
@@ -77,6 +79,9 @@ world.afterEvents.entityHitEntity.subscribe((evt) => {
 	const player = evt.damagingEntity as Player;
 	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
 	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
+
+	// test if player hold an item
+	if (!item) return;
 
 	// also create a LoreParser instance to manage/read the lore properly
 	const lp = new LoreParser(item);
