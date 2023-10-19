@@ -49,10 +49,16 @@ export default class LoreParser {
 		this.lore[index] = str;
 	}
 
-	public push(index: number, str: string): void | LoreWarning {
+	public push(index: number, ...lines: Array<string>): void | LoreWarning {
 		if (index >= this.lore.length) return new LoreWarning('EDIT_UNDEFINED_INDEX', index);
 		if (index + this.lore.length > LoreWarning.MAX_LORE_LINE) return new LoreWarning('MAX_LORE_LINE', index + this.lore.length);
-		this.lore.splice(index, 0, str);
+		if (index + this.lore.length + lines.length > LoreWarning.MAX_LORE_LINE)
+			return new LoreWarning('MAX_LORE_LINE', index + this.lore.length + lines.length);
+		lines.forEach((line) => this.lore.splice(index, 0, line));
+	}
+
+	public clear(): void {
+		this.lore = [];
 	}
 
 	/*
@@ -82,6 +88,8 @@ export default class LoreParser {
 
 	public initTemplates(...templates: Array<Template<TKeys>>): void | LoreWarning {
 		this.lore = [];
+
+		if (templates.length === 0) return new LoreWarning('INIT_VOID_TEMPLATES');
 
 		const length = this.lore.length + templates.map((v) => v.shape.length).reduce((accumulator, curr) => accumulator + curr);
 

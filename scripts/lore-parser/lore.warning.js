@@ -14,5 +14,6 @@ LoreWarning.warnings = {
     MAX_LORE_LINE: `You have tried to add a lore line at the index %s, but you can't have more than ${LoreWarning.MAX_LORE_LINE} lines of lore!`,
     REMOVE_UNDEFINED_INDEX: `You've tried to remove a lore line, but the index %s is not reachable!`,
     EDIT_UNDEFINED_INDEX: `You've tried to edit a lore line, but the index %s is not reachable!`,
+    INIT_VOID_TEMPLATES: `You've tried init templates without any templates!`,
 };
 export default LoreWarning;

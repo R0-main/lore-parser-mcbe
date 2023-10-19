@@ -1,4 +1,4 @@
-import { Container, EntityComponent, world, ItemStack, Player } from '@minecraft/server';
+import { Container, EntityComponent, world, ItemStack, Player, EntityInventoryComponent } from '@minecraft/server';
 import ComplexTemplate from 'lore-parser/complex.template';
 import LoreParser from 'lore-parser/lore.parser';
 import Template, { TKeys } from 'lore-parser/template';
@@ -60,76 +60,95 @@ const armorTemplate = new Template(
 
 const itemTemplate = new ComplexTemplate([weaponTemplate, armorTemplate], { clearLines: true });
 
+// first we define a new template, that will store damages and effect.
+const swordTemplate = new Template(
+	[
+		// make sur each line of this array is shorter than 50 character and the array need to be shorter than 20 lines
+		'┌─',
+		'│',
+		'│ §hDamage §8->§c %d',
+		'│ §hEffect §8->§e %e',
+		'│ ',
+		'└─ ',
+	],
+	{
+		damage: '%d', // here all '%d' in the array right above will be replace by setted 'damage' value
+		effect: '%e', // here all '%e' in the array right above will be replace by setted 'effect' value
+	},
+	{
+		clearLines: true, // this option will set '§r' before each lore line to set them clear
+		basesColors: '§7', // this option will add '§7' before each lore line
+	}
+);
+
+/*
+
+	Chat Send Event 
+		- in this event we will manage the lore of the holded item to apply the correct lore to store custom data as damage or effect. 
+		
+*/
 world.afterEvents.chatSend.subscribe((evt) => {
-	// @ts-ignore
-	const inventory = evt.sender.getComponent('inventory')?.container as Container;
-	const item = inventory.getItem(evt.sender.selectedSlot);
+	// setup all needed variables as inventory but in particular item
+	const player: Player = evt.sender;
+	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
+	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
 
+	// test if player hold an item
+	if (!item) return player.sendMessage('§cYou need to hold an item');
+
+	// also create a LoreParser instance to manage the lore properly
 	const lp = new LoreParser(item);
-	/* 
-	lp.add('Testing Line');
 
-	lp.edit(0, 'Line edited');
+	// test if the item has already the swordTemplate inited
+	if (lp.hasTemplates(swordTemplate)) return player.sendMessage('§cYour item already has the "swordTemplate" inited');
 
-	lp.push(3, 'Pushed Line');
+	// else, clear the lore to be sur it is a clean lore
+	lp.clear();
 
-	lp.remove(3);
+	// init swordTemplate to make sur we can next set values
+	lp.initTemplates(swordTemplate);
 
-	lp.for(weaponTemplate).set('damage', 1000);
+	// then, define the 'damage' and 'effect'
+	lp.for(swordTemplate).set('damage', 10);
+	lp.for(swordTemplate).set('effect', 'levitation');
 
-	lp.for(weaponTemplate).get('damage'); // 1000
-
-	lp.getTemplates(); // [weaponTemplate]
-
-	lp.hasTemplates(weaponTemplate); // true
-	lp.hasTemplates(weaponTemplate, armorTemplate); // false
-
-	lp.pushTemplates(3, armorTemplate); */
-
-	/* lp.addTemplates(armorTemplate) */
-	lp.removeTemplates(armorTemplate);
-
-	console.warn(lp.hasTemplates(armorTemplate));
-
-	/* lp.initTemplates(armorTemplate, weaponTemplate);
-
-	lp.for(armorTemplate).set('durability', 1000) */
-
-	lp.update(evt.sender);
+	// to finish update the item lore into player's inventory
+	lp.update(player);
 });
 
-const rarityTemplate = new Template(
-	[
-		'┌─', 
-		'│', 
-		'│ §hRarity §8-> %r', 
-		'│ ', 
-		'└─ '
-	],
-	{
-		rarity: '%r',
-	},
-	{
-		clearLines: true,
-		basesColors: '§7',
-	}
-);
+/*
 
-const durabilityTemplate = new Template(
-	[
-		'(%durability/%maxDurability)'
-	],
-	{
-		durability: '%durability',
-		maxDurability: '%maxDurability',
-	},
-	{
-		clearLines: true,
-		basesColors: '§7',
-	}
-);
+	Entity Hit Entity Event 
+		- in this event we will apply damage and effect to hitEntity stored in the lore
 
-const itemTpl = new ComplexTemplate([rarityTemplate, durabilityTemplate]);
+*/
+world.afterEvents.entityHitEntity.subscribe((evt) => {
+	// check if the damagingEntity is a Player
+	if (!(evt.damagingEntity instanceof Player)) return;
+
+	// setup all needed variables as inventory but in particular item
+	const player = evt.damagingEntity as Player;
+	const inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
+	const item: ItemStack = inventory.container.getItem(player.selectedSlot);
+
+	// test if player hold an item
+	if (!item) return;
+
+	// also create a LoreParser instance to manage/read the lore properly
+	const lp = new LoreParser(item);
+
+	// test if the item has the swordTemplate inited
+	if (!lp.hasTemplates(swordTemplate)) return;
+
+	// read the stored values
+	const damage = lp.for(swordTemplate).get('damage');
+	const effect = lp.for(swordTemplate).get('effect');
+
+	// apply damage for 'damageEntity' (we have to convert the damage variable into number because lore parser gives a string value)
+	evt.hitEntity.applyDamage(Number(damage));
+	// apply the stored effect for 'damageEntity'
+	evt.hitEntity.addEffect(effect, 100);
+});
 
 world.afterEvents.buttonPush.subscribe(({ source }) => {
 	const player = source as Player;
@@ -147,26 +166,38 @@ world.afterEvents.buttonPush.subscribe(({ source }) => {
 	lp.for(itemTpl).set('durability', 100);
 	lp.for(itemTpl).set('maxDurability', 110);
 
+	lp.for(itemTemplate).set('durability', 100);
+
+	lp.pushTemplates(1, itemTemplate, itemTpl);
+
+	lp.removeTemplates(itemTemplate);
+
 	lp.update(player);
 });
 
-world.afterEvents.entityHitEntity.subscribe((evt) => {
-	const player: Player = evt.damagingEntity as Player;
+const rarityTemplate = new Template(
+	['┌─', '│', '│ §hRarity §8-> %r', '│ ', '└─ '],
+	{
+		rarity: '%r',
+	},
+	{
+		clearLines: true,
+		basesColors: '§7',
+	}
+);
 
-	// @ts-ignore
-	const inventory = player.getComponent('inventory')?.container as Container;
-	const item = inventory.getItem(player.selectedSlot);
-	const lp = new LoreParser(item);
+const durabilityTemplate = new Template(
+	['(%durability/%maxDurability)'],
+	{
+		durability: '%durability',
+		maxDurability: '%maxDurability',
+	},
+	{
+		clearLines: true,
+		basesColors: '§7',
+	}
+);
 
-	if (!lp.hasTemplates(itemTpl)) return player.sendMessage("§tTu n'a pas d'item custom");
-
-	const damage = 1;
-
-	console.warn(lp.for(itemTpl).get('rarity'));
-
-	evt.hitEntity.applyDamage(damage);
-
-	evt.hitEntity.dimension.spawnParticle('minecraft:soul_particle', evt.hitEntity.location);
-});
+const itemTpl = new ComplexTemplate([rarityTemplate, durabilityTemplate]);
 
 console.warn('first');

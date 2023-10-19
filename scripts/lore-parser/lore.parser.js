@@ -38,12 +38,17 @@ export default class LoreParser {
             return new LoreWarning('EDIT_UNDEFINED_INDEX', index);
         this.lore[index] = str;
     }
-    push(index, str) {
+    push(index, ...lines) {
         if (index >= this.lore.length)
             return new LoreWarning('EDIT_UNDEFINED_INDEX', index);
         if (index + this.lore.length > LoreWarning.MAX_LORE_LINE)
             return new LoreWarning('MAX_LORE_LINE', index + this.lore.length);
-        this.lore.splice(index, 0, str);
+        if (index + this.lore.length + lines.length > LoreWarning.MAX_LORE_LINE)
+            return new LoreWarning('MAX_LORE_LINE', index + this.lore.length + lines.length);
+        lines.forEach((line) => this.lore.splice(index, 0, line));
+    }
+    clear() {
+        this.lore = [];
     }
     /*
      *
@@ -68,6 +73,8 @@ export default class LoreParser {
      */
     initTemplates(...templates) {
         this.lore = [];
+        if (templates.length === 0)
+            return new LoreWarning('INIT_VOID_TEMPLATES');
         const length = this.lore.length + templates.map((v) => v.shape.length).reduce((accumulator, curr) => accumulator + curr);
         if (length > LoreWarning.MAX_LORE_LINE)
             return new LoreWarning('MAX_LORE_LINE', length);
