@@ -110,51 +110,39 @@ world.afterEvents.entityHitEntity.subscribe((evt) => {
 
 Adding 'This is a new line of lore' to the lore.
 ```ts
-
 loreParser.add('This is a new line of lore');
-
 ```
 You can also add several lines at once.
 ```ts
-
 loreParser.add('This is a new line of lore', 'An other line of lore', 'end of the lore....');
-
 ```
 
 ### Push Lines
 
-You can push line at a specified index : 
+You can push a line at a specified index : 
 ```ts
-
 loreParser.push(0, 'First pushed line', 'An other pushed line');
-
 ```
 
 ### Edit Lines
 
-You can push line at a specified index : 
+You can edit a line at a specified index : 
 ```ts
-
 loreParser.edit(0, 'The line at index 0 is this message now');
-
 ```
 
 ### Remove Lines
 
 You can remove line at a specified index : 
 ```ts
-
 loreParser.remove(0);
-
 ```
 
 ### Clear Lore
 
 You can clear the entire lore : 
 ```ts
-
 loreParser.clear();
-
 ```
 
 ### Update Lore
@@ -328,6 +316,12 @@ you can also select the slot, by default the slot is setted to 'player.selectedS
 ```ts
 loreParser.update(player, 6)
 ```
+
+# Lore Warnings 
+
+As you know, minecraft setted a limit for max lore line length = 50 character and limit for max lore line = 20 lines. So to made a system that don't crash the addon for lines of lore, i've decided to implement lore warnings. These warnings are triggers each time you try to add more then 20 lines, or when you try to set a more than 50 charactere values. Instead of having a minecraft error that ends the function at the lore set, you will have a custom warning that inform you if you hva tried to do something wrong.
+
+Note : If one day, minecraft decide to changes limit for max lore line length or limit for max lore line, you can easely changes that in the `lore-parser/lore.warnings.ts` file.
 
 
 
