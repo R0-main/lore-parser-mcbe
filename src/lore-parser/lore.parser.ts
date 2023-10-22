@@ -4,6 +4,7 @@ import LoreWarning from './lore.warning';
 import TemplatesManager from './templates.manager';
 import TemplateEditor from './template.editor';
 
+
 export type TTemplate = {
 	shape: Array<string>;
 	keys: Record<string, string>;

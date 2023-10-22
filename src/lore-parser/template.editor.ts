@@ -18,7 +18,7 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 		const val = value.toString();
 
 		const separatedTemplates: Array<TShape> = TemplatesManager.getSeperatedTemplates(this.loreParserInstance.lore);
-		const indexs: Array<number> = TemplatesManager.getTemplateIndex(this.template, separatedTemplates);
+		const indexs: Array<number> = separatedTemplates.length === 1 ? [0] : TemplatesManager.getTemplateIndex(this.template, separatedTemplates);
 
 		let lore: Array<TShape> | TShape = separatedTemplates;
 
@@ -26,8 +26,11 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 			for (const index of indexs) {
 				if (val.length + lore[index].length > LoreWarning.MAX_LORE_LINE_LENGTH) return new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length);
 
-				lore[index] = lore[index].map((line) => line.replaceAll(keyValue, val));
+				let splitLore = lore[index].map((line) => line.split(TemplatesManager.MARKER));
+				splitLore = splitLore.map((line, i) => this.replaceKeyByValue(keyValue, val, line, i));
+				lore[index] = splitLore.map((line) => line.join(''));
 
+				// WARNINGS MANAGER
 				if (lore[index].some((line) => line.length >= LoreWarning.MAX_LORE_LINE_LENGTH))
 					return new LoreWarning(
 						'MAX_LORE_LINE_LENGTH',
@@ -36,17 +39,9 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 					);
 			}
 		} else {
-			lore = separatedTemplates.flat().map((line, index) => {
-				if (line.includes(keyValue)) {
-					if (val.length + line.length > LoreWarning.MAX_LORE_LINE_LENGTH) {
-						new LoreWarning('MAX_LORE_LINE_LENGTH', index, val.length + line.length);
-						return line;
-					}
-
-					return line.replaceAll(keyValue, val);
-				}
-				return line;
-			});
+			let splitLore = separatedTemplates.flat().map((line) => line.split(TemplatesManager.MARKER));
+			splitLore = splitLore.map((line, i) => this.replaceKeyByValue(keyValue, val, line, i));
+			lore = splitLore.map((line) => line.join(''));
 		}
 
 		this.loreParserInstance.lore = lore.flat();
@@ -66,5 +61,33 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 		const value = targetLine.split(TemplatesManager.MARKER);
 
 		return value[keyIndex] || null;
+	}
+
+	/*
+	 *
+	 * Util Method
+	 *
+	 */
+
+	private replaceKeyByValue(keyValue: string, value: string, line: Array<string>, i: number) {
+		const keyIndexs = this.findIndexsOf(keyValue, this.template.shape[i].split(TemplatesManager.MARKER));
+
+		if (keyIndexs.length > 0) {
+			for (const idx of keyIndexs) {
+				line[idx] = `${TemplatesManager.MARKER}${value}${TemplatesManager.MARKER}`;
+			}
+		} else {
+			for (const key of Object.values(this.template.keys)) {
+				const keyIndexs = this.findIndexsOf(key, this.template.shape[i].split(TemplatesManager.MARKER));
+				for (const idx of keyIndexs) {
+					line[idx] = `${TemplatesManager.MARKER}${line[idx].replaceAll(TemplatesManager.MARKER, '')}${TemplatesManager.MARKER}`;
+				}
+			}
+		}
+		return line;
+	}
+
+	private findIndexsOf<T>(target: T, array: Array<T>): Array<number> {
+		return array.reduce((r, v, i) => r.concat(v === target ? i : []), []);
 	}
 }

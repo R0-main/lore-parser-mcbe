@@ -1,4 +1,6 @@
-./scripts
-./node_modules
-./build.bat
+scripts/
+node_modules/
+build.bat
 *.js
+src/main.ts
+src/main.ts
