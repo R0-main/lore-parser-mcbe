@@ -12,9 +12,9 @@ export type TTemplate = {
 };
 
 export default class LoreParser {
-	public lore: TShape = this.itemStack.getLore() || [];
+	public lore: TShape = this._itemStack.getLore() || [];
 
-	constructor(public itemStack: ItemStack) {}
+	constructor(private _itemStack: ItemStack) {}
 
 	/*
 	 *
@@ -67,6 +67,11 @@ export default class LoreParser {
 	 * Get Method
 	 *
 	 */
+
+	get itemStack() : ItemStack {
+		this._itemStack.setLore(this.lore)
+		return this._itemStack
+	}
 
 	public getTemplates(): Array<Template<TKeys>> {
 		return [...TemplatesManager.getTemplates(this.lore)];
@@ -138,7 +143,6 @@ export default class LoreParser {
 	 */
 
 	public update(player: Player, slot: number = player.selectedSlot): void {
-		this.itemStack.setLore(this.lore);
 		let inventory = player.getComponent(EntityInventoryComponent.componentId) as EntityInventoryComponent;
 		inventory.container.setItem(slot, this.itemStack);
 	}
