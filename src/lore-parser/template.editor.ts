@@ -65,7 +65,7 @@ export default class TemplateEditor<TTemplate extends Template<TKeys>> {
 
 	/*
 	 *
-	 * Util Method
+	 * Utils Methods
 	 *
 	 */
 
