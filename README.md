@@ -325,7 +325,7 @@ that will return to you the itemStack with the correct lore
 
 # Lore Warnings 
 
-As you know, minecraft setted a limit for max lore line length = 50 character and limit for max lore line = 20 lines. So to made a system that don't crash the addon for lines of lore, i've decided to implement lore warnings. These warnings are triggers each time you try to add more then 20 lines, or when you try to set a more than 50 charactere values. Instead of having a minecraft error that ends the function at the lore set, you will have a custom warning that inform you if you hva tried to do something wrong.
+As you know, minecraft set a limit for max lore line length = 50 character and limit for max lore line = 20 lines. So to made a system that don't crash the addon for lines of lore, i've decided to implement lore warnings. These warnings are triggers each time you try to add more then 20 lines, or when you try to set a more than 50 charactere values. Instead of having a minecraft error that ends the function at the lore set, you will have a custom warning that inform you if you hva tried to do something wrong.
 
 Note : If one day, minecraft decide to changes limit for max lore line length or limit for max lore line, you can easely changes that in the `lore-parser/lore.warnings.ts` file.
 
